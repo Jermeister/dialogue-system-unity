@@ -4,8 +4,5 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes:
-  - enabled: 1
-    path: Assets/3rdPerson+Fly/Scenes/3rdPerson+Fly.unity
-    guid: edce6a3cd6b78e7459bd2864b9295f8c
+  m_Scenes: []
   m_configObjects: {}
