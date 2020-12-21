@@ -23,20 +23,38 @@ public class DialogueGraph : EditorWindow
         ConstructGraphView();
         GenerateToolbar();
         GenerateMinimap();
+        GenerateBlackBoard();
+    }
 
+    private void GenerateBlackBoard()
+    {
+        var blackboard = new Blackboard(_graphView);
+        blackboard.Add(new BlackboardSection{title="Properties"});
+        blackboard.addItemRequested = _blackboard =>
+        {
+            _graphView.AddPropertyToBlackboard();
+        };
+        
+        blackboard.SetPosition(new Rect(10, 30, 200, 300));
+        
+        _graphView.Add(blackboard);
     }
 
     private void GenerateMinimap()
     {
         var minimap = new MiniMap {anchored = true};
-        minimap.SetPosition((new Rect(10, 30, 200, 140)));
+        
+        // 10 px offset from the left
+        var coords = _graphView.contentViewContainer.WorldToLocal(new Vector2(maxSize.x - 10, 30));
+        
+        minimap.SetPosition((new Rect(coords.x, coords.y, 200, 140)));
         _graphView.Add(minimap);
     }
 
 
     private void ConstructGraphView()
     {
-        _graphView = new DialogueGraphView
+        _graphView = new DialogueGraphView(this)
         {
             name = "Dialogue Graph Editor"
         };
@@ -58,14 +76,7 @@ public class DialogueGraph : EditorWindow
         
         toolbar.Add(new Button(() => RequestDataOperation(true)){text = "Save Asset"});
         toolbar.Add(new Button(() => RequestDataOperation(false)){text = "Load Asset"});
-
         
-        var nodeCreateButton = new Button(() => { _graphView.CreateNode("Dialogue Node", "Dialogue Text"); });
-        nodeCreateButton.text = "Create Dialogue Node";
-        
-        
-        
-        toolbar.Add(nodeCreateButton);
         rootVisualElement.Add(toolbar);
     }
 

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine.UIElements;
@@ -9,8 +10,10 @@ using UnityEngine.UIElements;
 public class DialogueGraphView : GraphView
 {
     public readonly Vector2 defaultNodeSize = new Vector2(150,200);
-    
-    public DialogueGraphView()
+
+    private NodeSearchWindow _searchWindow;
+
+    public DialogueGraphView(EditorWindow editorWindow)
     {
         styleSheets.Add(Resources.Load<StyleSheet>("DialogueGraphStyleSheet"));
         SetupZoom(ContentZoomer.DefaultMinScale, ContentZoomer.DefaultMaxScale);
@@ -24,6 +27,16 @@ public class DialogueGraphView : GraphView
         gridBackground.StretchToParentSize();
 
         AddElement(GenerateEntryPoint());
+        AddSearchWindow(editorWindow);
+    }
+
+    private void AddSearchWindow(EditorWindow editorWindow)
+    {
+        _searchWindow = ScriptableObject.CreateInstance<NodeSearchWindow>();
+        _searchWindow.Init(editorWindow, this);
+        
+        nodeCreationRequest = context =>
+            SearchWindow.Open(new SearchWindowContext(context.screenMousePosition), _searchWindow);
     }
 
     public override List<Port> GetCompatiblePorts(Port startPort, NodeAdapter nodeAdapter)
@@ -67,13 +80,13 @@ public class DialogueGraphView : GraphView
         return node;
     }
     
-    public void CreateNode(string nodeName, string nodeText)
+    public void CreateNode(string nodeName, string nodeText="", Vector2 position = new Vector2())
     {
-        AddElement(CreateDialogueNode(nodeName, nodeText));
+        AddElement(CreateDialogueNode(nodeName, nodeText, position));
     }
 
 
-    public DialogueNode CreateDialogueNode(string nodeName, string dialogueText)
+    public DialogueNode CreateDialogueNode(string nodeName, string dialogueText, Vector2 position)
     {
         var node = new DialogueNode
         {
@@ -108,8 +121,10 @@ public class DialogueGraphView : GraphView
         
         node.RefreshPorts();
         node.RefreshExpandedState();
+        
+        var spawnRect = new Rect();
 
-        node.SetPosition(new Rect(new Vector2(-viewTransform.position.x, -viewTransform.position.y), defaultNodeSize));
+        node.SetPosition(new Rect(position, defaultNodeSize));
 
         return node;
     }
@@ -163,5 +178,10 @@ public class DialogueGraphView : GraphView
         node.outputContainer.Remove(generatedPort);
         node.RefreshPorts();
         node.RefreshExpandedState();
+    }
+
+    public void AddPropertyToBlackboard()
+    {
+        throw new NotImplementedException();
     }
 }
