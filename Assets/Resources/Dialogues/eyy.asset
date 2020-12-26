@@ -10,42 +10,42 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5b97a2d6f42c1ed4191e64880d533765, type: 3}
-  m_Name: DialogueTest1
+  m_Name: eyy
   m_EditorClassIdentifier: 
   nodeLinks:
   - baseNodeGuid: 76bb1ee3-8389-4906-8f83-93796155daf1
     portName: Next
     targetNodeGuid: 9d897613-81ec-4ad2-8fc0-496dcf571356
   - baseNodeGuid: 9d897613-81ec-4ad2-8fc0-496dcf571356
-    portName: asdasdasdasdasdasdasdasdas
-    targetNodeGuid: 926bf8ad-b60a-475d-828f-a3b0c3209800
+    portName: asdasddddddddddddddddddddddddddd
+    targetNodeGuid: a0702cbe-e800-4890-94b8-eeaddb71d514
   - baseNodeGuid: 9d897613-81ec-4ad2-8fc0-496dcf571356
     portName: asdasdasdasdasdasdasdasdasdasdas
-    targetNodeGuid: e1ec199b-4f73-4a12-af54-84fba15f199f
+    targetNodeGuid: c4f297d0-ca5a-4c89-b4dc-18e9f9d9bd07
   - baseNodeGuid: 9d897613-81ec-4ad2-8fc0-496dcf571356
-    portName: asdasddddddddddddddddddddddddddd
-    targetNodeGuid: ae33831d-46b0-4b9c-b7eb-f84ecc659d29
+    portName: Choice 2
+    targetNodeGuid: f43841da-4168-45ed-b1a1-5d05365141af
   dialogueNodeData:
-  - guid: 926bf8ad-b60a-475d-828f-a3b0c3209800
+  - guid: c4f297d0-ca5a-4c89-b4dc-18e9f9d9bd07
     dialogueName: Dialogue Node
-    dialogueText: Dialogue Text
-    position: {x: 739, y: 162}
+    dialogueText: Nothingb ro
+    position: {x: 640, y: 216}
+  - guid: a0702cbe-e800-4890-94b8-eeaddb71d514
+    dialogueName: Dialogue Node
+    dialogueText: Yo what's up
+    position: {x: 627, y: 70}
   - guid: 9d897613-81ec-4ad2-8fc0-496dcf571356
     dialogueName: Dialogue Node
-    dialogueText: Dialogue Text
-    position: {x: 234, y: 177}
-  - guid: e1ec199b-4f73-4a12-af54-84fba15f199f
+    dialogueText: asdasdad
+    position: {x: 214, y: 200}
+  - guid: f43841da-4168-45ed-b1a1-5d05365141af
     dialogueName: Dialogue Node
-    dialogueText: Dialogue Text
-    position: {x: 739, y: 251}
-  - guid: ae33831d-46b0-4b9c-b7eb-f84ecc659d29
-    dialogueName: Dialogue Node
-    dialogueText: Dialogue Text
-    position: {x: 715, y: 353}
+    dialogueText: sdasdad
+    position: {x: 627, y: 348}
   exposedProperties:
   - PropertyName: New String
     PropertyValue: New Value
-  - PropertyName: New String_1
+  - PropertyName: Jonas
     PropertyValue: New Value
-  - PropertyName: New String_2
+  - PropertyName: NoIdea
     PropertyValue: New Value

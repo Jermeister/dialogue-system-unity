@@ -11,6 +11,9 @@ public class DialogueGraphView : GraphView
 {
     public readonly Vector2 defaultNodeSize = new Vector2(150,200);
 
+    public Blackboard blackboard;
+    public List<ExposedProperty> exposedProperties = new List<ExposedProperty>();
+    
     private NodeSearchWindow _searchWindow;
 
     public DialogueGraphView(EditorWindow editorWindow)
@@ -121,8 +124,6 @@ public class DialogueGraphView : GraphView
         
         node.RefreshPorts();
         node.RefreshExpandedState();
-        
-        var spawnRect = new Rect();
 
         node.SetPosition(new Rect(position, defaultNodeSize));
 
@@ -180,8 +181,57 @@ public class DialogueGraphView : GraphView
         node.RefreshExpandedState();
     }
 
-    public void AddPropertyToBlackboard()
+    public void AddPropertyToBlackboard(ExposedProperty exposedProperty)
     {
-        throw new NotImplementedException();
+        // Save local / temp values
+        var localName = exposedProperty.PropertyName;
+        var localValue = exposedProperty.PropertyValue;
+
+        // Find duplicate names and count them
+        int tempCounter = 0;
+        string tempName = localName;
+        while (exposedProperties.Any(x => x.PropertyName == tempName))
+        {
+            tempCounter++;
+            tempName = $"{localName}_{tempCounter}";
+        }
+
+
+        if (tempCounter > 0)
+            localName = $"{localName}_{tempCounter}";
+
+        
+        var property = new ExposedProperty
+        {
+            PropertyName = localName, 
+            PropertyValue = localValue
+        };
+        exposedProperties.Add(property);
+
+        var container = new VisualElement();
+        var blackboardField = new BlackboardField{text = localName, typeText = "string property"};
+        container.Add(blackboardField);
+
+        var propertyValueTextField = new TextField("Value:")
+        {
+            value = localValue
+        };
+
+        propertyValueTextField.RegisterValueChangedCallback(evt =>
+        {
+            var changingPropertyIndex = exposedProperties.FindIndex(x => x.PropertyName == property.PropertyName);
+            exposedProperties[changingPropertyIndex].PropertyName = evt.newValue;
+        });
+        
+        var blackboardValueRow = new BlackboardRow(blackboardField, propertyValueTextField);
+        container.Add(blackboardValueRow);
+        
+        blackboard.Add(container);
+    }
+
+    public void ClearExposedProperties()
+    {
+        exposedProperties.Clear();
+        blackboard.Clear();
     }
 }

@@ -42,3 +42,16 @@ MonoBehaviour:
     dialogueName: Dialogue Node
     dialogueText: sdasdad
     position: {x: 627, y: 348}
+  exposedProperties:
+  - PropertyName: New String
+    PropertyValue: New Value
+  - PropertyName: Jonas
+    PropertyValue: New Value
+  - PropertyName: Petras
+    PropertyValue: New Value
+  - PropertyName: Katins
+    PropertyValue: New Value
+  - PropertyName: Antans
+    PropertyValue: New Value
+  - PropertyName: Durns
+    PropertyValue: New Value
