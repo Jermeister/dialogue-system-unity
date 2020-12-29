@@ -33,6 +33,7 @@ public class DialogueGraph : EditorWindow
     private void GenerateBlackBoard()
     {
         var blackboard = new Blackboard(_graphView);
+        blackboard.scrollable = true;
         blackboard.Add(new BlackboardSection{title="Exposed properties"});
         blackboard.addItemRequested = _blackboard =>
         {
@@ -63,7 +64,6 @@ public class DialogueGraph : EditorWindow
         blackboard.SetPosition(new Rect(10, 180, 200, 300));
         
         _graphView.Add(blackboard);
-
         _graphView.blackboard = blackboard;
     }
 

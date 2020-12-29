@@ -29,7 +29,6 @@ public class GraphSaveUtility
 
         if (!SaveNodes(dialogueContainer))
         {
-            Debug.LogError("No connections, cannot save!");
             return;
         }
         
@@ -58,9 +57,21 @@ public class GraphSaveUtility
     public bool SaveNodes(DialogueContainer dialogueContainer)
     {
         // No connections, don't save anything
-        if (!edges.Any()) return false;
+        if (!edges.Any())
+        {
+            EditorUtility.DisplayDialog("Error", "No connections. Please connect some nodes to save.", "OK");
+            return false;
+        }
+        
+        // No connections from Start Node
+        var entryPoint = edges.Find(x => x.output.node.title == "Start");        
+        if(entryPoint == null)
+        {
+            EditorUtility.DisplayDialog("Error", "Start Node must be connected before saving.", "OK");
+            return false;
+        }
 
-        var connectedPorts = edges.Where(x => x.input.node != null).ToArray();
+        var connectedPorts = edges.Where(x => x.input.node != null).OrderByDescending(x => ((DialogueNode)(x.output.node)).entryPoint).ToArray();
 
         for (int i = 0; i < connectedPorts.Length; i++)
         {

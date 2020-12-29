@@ -2,14 +2,17 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
+using Unity.Profiling;
 using UnityEditor;
 using UnityEngine;
 using UnityEditor.Experimental.GraphView;
+using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
 public class DialogueGraphView : GraphView
 {
-    public readonly Vector2 defaultNodeSize = new Vector2(150,200);
+    public readonly Vector2 defaultNodeSize = new Vector2(200,150);
 
     public Blackboard blackboard;
     public List<ExposedProperty> exposedProperties = new List<ExposedProperty>();
@@ -99,11 +102,19 @@ public class DialogueGraphView : GraphView
             guid = Guid.NewGuid().ToString(),
         };
 
+        // Assign stylesheet
+        node.styleSheets.Add(Resources.Load<StyleSheet>("Node"));
+        
+        // Generate Input Port
         var inputPort = GeneratePort(node, Direction.Input, Port.Capacity.Multi);
         inputPort.portName = "Input";
         node.inputContainer.Add(inputPort);
         
-        node.styleSheets.Add(Resources.Load<StyleSheet>("Node"));
+        node.RefreshExpandedState();
+        node.RefreshPorts();
+        node.SetPosition(new Rect(position,
+            defaultNodeSize));
+
         
         var button = new Button(() => { AddChoicePort(node); });
         button.text = "Add Choice";
@@ -121,11 +132,6 @@ public class DialogueGraphView : GraphView
         });
 
         node.mainContainer.Add(textField);
-        
-        node.RefreshPorts();
-        node.RefreshExpandedState();
-
-        node.SetPosition(new Rect(position, defaultNodeSize));
 
         return node;
     }
@@ -133,13 +139,13 @@ public class DialogueGraphView : GraphView
     public void AddChoicePort(DialogueNode node, string overridePortName = "")
     {
         var generatedPort = GeneratePort(node, Direction.Output);
-        
+
         // Removing default label
         var oldLabel = generatedPort.contentContainer.Q<Label>("type");
-        generatedPort.contentContainer.Remove(oldLabel);
-        
-        generatedPort.contentContainer.Add(new Label("  "));
-        
+        oldLabel.visible = false;
+        oldLabel.style.flexBasis = 0;
+        //generatedPort.contentContainer.Remove(oldLabel);
+
         var outputPortCount = node.outputContainer.childCount;
         var choicePortName = string.IsNullOrEmpty(overridePortName) ? $"Choice {outputPortCount}" : overridePortName;
 
@@ -149,19 +155,22 @@ public class DialogueGraphView : GraphView
             value = choicePortName
         };
         textField.RegisterValueChangedCallback(evt => generatedPort.portName = evt.newValue);
-        generatedPort.Add(textField);
+        
+        generatedPort.contentContainer.Add(textField);
 
         var deleteButton = new Button(()=> RemovePort(node, generatedPort))
         {
             text = "X",
         };
-        generatedPort.Add(deleteButton);
+        
+        generatedPort.contentContainer.Add(deleteButton);
         
         generatedPort.portName = choicePortName;
-        node.outputContainer.Add(generatedPort);
+        generatedPort.MarkDirtyRepaint();
         
-        node.RefreshPorts();
+        node.outputContainer.Add(generatedPort);
         node.RefreshExpandedState();
+        node.RefreshPorts();
     }
 
     private void RemovePort(DialogueNode node, Port generatedPort)
@@ -181,45 +190,54 @@ public class DialogueGraphView : GraphView
         node.RefreshExpandedState();
     }
 
-    public void AddPropertyToBlackboard(ExposedProperty exposedProperty)
+    public void AddPropertyToBlackboard(ExposedProperty exposedProperty, bool noCheck = false)
     {
         // Save local / temp values
         var localName = exposedProperty.PropertyName;
         var localValue = exposedProperty.PropertyValue;
 
-        // Find duplicate names and count them
-        int tempCounter = 0;
-        string tempName = localName;
-        while (exposedProperties.Any(x => x.PropertyName == tempName))
+        if (!noCheck)
         {
-            tempCounter++;
-            tempName = $"{localName}_{tempCounter}";
-        }
+            // Find duplicate names and count them
+            int tempCounter = 0;
+            string tempName = localName;
+            while (exposedProperties.Any(x => x.PropertyName == tempName))
+            {
+                tempCounter++;
+                tempName = $"{localName}_{tempCounter}";
+            }
 
 
-        if (tempCounter > 0)
-            localName = $"{localName}_{tempCounter}";
-
+            if (tempCounter > 0)
+                localName = $"{localName}_{tempCounter}";
         
-        var property = new ExposedProperty
-        {
-            PropertyName = localName, 
-            PropertyValue = localValue
-        };
-        exposedProperties.Add(property);
-
+            var property = new ExposedProperty
+            {
+                PropertyName = localName, 
+                PropertyValue = localValue
+            };
+            exposedProperties.Add(property);
+        }
+        
         var container = new VisualElement();
-        var blackboardField = new BlackboardField{text = localName, typeText = "string property"};
+        var blackboardField = new BlackboardField{text = localName, typeText = "string"};
+        blackboardField.Q<Label>("typeLabel").style.flexBasis = StyleKeyword.Auto;
+        blackboardField.capabilities &= ~Capabilities.Deletable;
+        
+        blackboardField.RegisterCallback<ContextualMenuPopulateEvent>(PopulateDeleteOption);
+        blackboardField.Add(new Button(() => { RemovePropertyFromBlackboard(localName); }) { text = "X" });
+        
         container.Add(blackboardField);
 
         var propertyValueTextField = new TextField("Value:")
         {
             value = localValue
         };
+        propertyValueTextField.Q<Label>().style.minWidth = StyleKeyword.Auto;
 
         propertyValueTextField.RegisterValueChangedCallback(evt =>
         {
-            var changingPropertyIndex = exposedProperties.FindIndex(x => x.PropertyName == property.PropertyName);
+            var changingPropertyIndex = exposedProperties.FindIndex(x => x.PropertyName == localName);
             exposedProperties[changingPropertyIndex].PropertyName = evt.newValue;
         });
         
@@ -227,6 +245,34 @@ public class DialogueGraphView : GraphView
         container.Add(blackboardValueRow);
         
         blackboard.Add(container);
+    }
+
+
+    void PopulateDeleteOption(ContextualMenuPopulateEvent evt)
+    {
+        evt.menu.AppendAction("Delete", DeletePropertyFromBlackboard, DropdownMenuAction.AlwaysEnabled, ((BlackboardField)evt.target).text);
+    }
+    
+    private void RemovePropertyFromBlackboard(string propertyName)
+    {
+        var propertyToRemove = exposedProperties.Find(prop => prop.PropertyName == propertyName);
+        exposedProperties.Remove(propertyToRemove);
+ 
+        blackboard.Clear();
+        
+        //Add properties from data
+        foreach (var exposedProperty in exposedProperties)
+        {
+            AddPropertyToBlackboard(exposedProperty, true);
+        }
+    }
+
+    void DeletePropertyFromBlackboard(DropdownMenuAction dropdownMenuAction)
+    {
+        if (dropdownMenuAction.name == "Delete")
+        {
+            RemovePropertyFromBlackboard(dropdownMenuAction.userData.ToString());
+        }
     }
 
     public void ClearExposedProperties()

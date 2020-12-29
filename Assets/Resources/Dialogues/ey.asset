@@ -17,35 +17,33 @@ MonoBehaviour:
     portName: Next
     targetNodeGuid: 9d897613-81ec-4ad2-8fc0-496dcf571356
   - baseNodeGuid: 9d897613-81ec-4ad2-8fc0-496dcf571356
-    portName: asdasddddddddddddddddddddddddddd
-    targetNodeGuid: a0702cbe-e800-4890-94b8-eeaddb71d514
+    portName: Choice 2
+    targetNodeGuid: f43841da-4168-45ed-b1a1-5d05365141af
   - baseNodeGuid: 9d897613-81ec-4ad2-8fc0-496dcf571356
-    portName: asdasdasdasdasdasdasdasdasdasdas
+    portName: Choice 1
     targetNodeGuid: c4f297d0-ca5a-4c89-b4dc-18e9f9d9bd07
   - baseNodeGuid: 9d897613-81ec-4ad2-8fc0-496dcf571356
     portName: Choice 2
-    targetNodeGuid: f43841da-4168-45ed-b1a1-5d05365141af
+    targetNodeGuid: a0702cbe-e800-4890-94b8-eeaddb71d514
   dialogueNodeData:
-  - guid: c4f297d0-ca5a-4c89-b4dc-18e9f9d9bd07
-    dialogueName: Dialogue Node
-    dialogueText: Nothingb ro
-    position: {x: 640, y: 216}
-  - guid: a0702cbe-e800-4890-94b8-eeaddb71d514
-    dialogueName: Dialogue Node
-    dialogueText: Yo what's up
-    position: {x: 627, y: 70}
-  - guid: f43841da-4168-45ed-b1a1-5d05365141af
-    dialogueName: Dialogue Node
-    dialogueText: sdasdad
-    position: {x: 627, y: 348}
   - guid: 9d897613-81ec-4ad2-8fc0-496dcf571356
     dialogueName: Dialogue Node
     dialogueText: asdasdad
-    position: {x: 210, y: 200}
+    position: {x: 256, y: 168}
+  - guid: f43841da-4168-45ed-b1a1-5d05365141af
+    dialogueName: Dialogue Node
+    dialogueText: sdasdad
+    position: {x: 638, y: -8}
+  - guid: c4f297d0-ca5a-4c89-b4dc-18e9f9d9bd07
+    dialogueName: Dialogue Node
+    dialogueText: Nothingb ro
+    position: {x: 638, y: 102}
+  - guid: a0702cbe-e800-4890-94b8-eeaddb71d514
+    dialogueName: Dialogue Node
+    dialogueText: Yo what's up
+    position: {x: 638, y: 217}
   exposedProperties:
   - PropertyName: New String
     PropertyValue: New Value
   - PropertyName: Jonas
-    PropertyValue: New Value
-  - PropertyName: Petrars
     PropertyValue: New Value
