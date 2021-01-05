@@ -1,3 +1,11 @@
 DialogueNode #title {
     background-color: #433684;
 }
+
+ChoiceNode #title {
+    background-color: #844e4e;
+}
+
+BaseNode #title {
+    background-color: #87a587;
+}

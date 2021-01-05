@@ -58,136 +58,33 @@ public class DialogueGraphView : GraphView
         return compatiblePorts;
     }
 
-    private Port GeneratePort(DialogueNode targetNode, Direction portDirection, Port.Capacity capacity=Port.Capacity.Single)
+    private BaseNode GenerateEntryPoint()
     {
-        return targetNode.InstantiatePort(Orientation.Horizontal, portDirection, capacity, typeof(float));
-    }
-
-    private DialogueNode GenerateEntryPoint()
-    {
-        var node = new DialogueNode
-        {
-            title = "Start",
-            guid = Guid.NewGuid().ToString(),
-            entryPoint = true
-        };
-
-        node.SetPosition(new Rect(100, 200, 100, 150));
-        
-        var outputPort = GeneratePort(node, Direction.Output);
-        outputPort.portName = "Next";
-        node.outputContainer.Add(outputPort);
-        
-        node.capabilities &= ~Capabilities.Deletable;
-        
-        node.RefreshExpandedState();
-        node.RefreshPorts();
-        
+        var node = new BaseNode(NodeType.StartNode, this);
         return node;
     }
     
-    public void CreateNode(string nodeName, string nodeText="", Vector2 position = new Vector2())
+    public void CreateNode(NodeType _nodeType, Vector2 _position = new Vector2())
     {
-        AddElement(CreateDialogueNode(nodeName, nodeText, position));
+        AddElement(CreateDialogueNode(_nodeType, _position));
     }
 
 
-    public DialogueNode CreateDialogueNode(string nodeName, string dialogueText, Vector2 position)
+    private BaseNode CreateDialogueNode(NodeType _nodeType, Vector2 _position)
     {
-        var node = new DialogueNode
+        switch (_nodeType)
         {
-            title = nodeName,
-            nodeName = nodeName,
-            nodeText = dialogueText,
-            guid = Guid.NewGuid().ToString(),
-        };
-
-        // Assign stylesheet
-        node.styleSheets.Add(Resources.Load<StyleSheet>("Node"));
-        
-        // Generate Input Port
-        var inputPort = GeneratePort(node, Direction.Input, Port.Capacity.Multi);
-        inputPort.portName = "Input";
-        node.inputContainer.Add(inputPort);
-        
-        node.RefreshExpandedState();
-        node.RefreshPorts();
-        node.SetPosition(new Rect(position,
-            defaultNodeSize));
-
-        
-        var button = new Button(() => { AddChoicePort(node); });
-        button.text = "Add Choice";
-        node.titleContainer.Add(button);
-        
-        var textField = new TextField(string.Empty);
-        if (string.IsNullOrEmpty(dialogueText))
-            textField.value = string.Empty;
-        else
-            textField.value = dialogueText;
-
-        textField.RegisterValueChangedCallback(evt =>
-        {
-            node.nodeText = evt.newValue;
-        });
-
-        node.mainContainer.Add(textField);
-
-        return node;
-    }
-
-    public void AddChoicePort(DialogueNode node, string overridePortName = "")
-    {
-        var generatedPort = GeneratePort(node, Direction.Output);
-
-        // Removing default label
-        var oldLabel = generatedPort.contentContainer.Q<Label>("type");
-        oldLabel.visible = false;
-        oldLabel.style.flexBasis = 0;
-        //generatedPort.contentContainer.Remove(oldLabel);
-
-        var outputPortCount = node.outputContainer.childCount;
-        var choicePortName = string.IsNullOrEmpty(overridePortName) ? $"Choice {outputPortCount}" : overridePortName;
-
-        var textField = new TextField
-        {
-            name = string.Empty,
-            value = choicePortName
-        };
-        textField.RegisterValueChangedCallback(evt => generatedPort.portName = evt.newValue);
-        
-        generatedPort.contentContainer.Add(textField);
-
-        var deleteButton = new Button(()=> RemovePort(node, generatedPort))
-        {
-            text = "X",
-        };
-        
-        generatedPort.contentContainer.Add(deleteButton);
-        
-        generatedPort.portName = choicePortName;
-        generatedPort.MarkDirtyRepaint();
-        
-        node.outputContainer.Add(generatedPort);
-        node.RefreshExpandedState();
-        node.RefreshPorts();
-    }
-
-    private void RemovePort(DialogueNode node, Port generatedPort)
-    {
-        var targetEdge = edges.ToList().Where(x =>
-            x.output.portName == generatedPort.portName && x.output.node == generatedPort.node);
-
-        if (targetEdge.Any())
-        {
-            var edge = targetEdge.First();
-            edge.input.Disconnect(edge);
-            RemoveElement(edge);
+            case NodeType.StartNode:
+                return new BaseNode(_nodeType, this);
+            case NodeType.DialogueNode:
+                return new DialogueNode(_position, this);
+            case NodeType.ChoiceNode:
+                return new ChoiceNode(_position, this);
+            case NodeType.EndNode:
+                return new BaseNode(_nodeType, this);
+            default:
+                return null;
         }
-
-        node.outputContainer.Remove(generatedPort);
-        node.RefreshPorts();
-        node.RefreshExpandedState();
     }
 
     public void AddPropertyToBlackboard(ExposedProperty exposedProperty, bool noCheck = false)

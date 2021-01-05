@@ -166,19 +166,19 @@ public class DialogueGraph : EditorWindow
     {
         //Get the instanceID of the DialogueGraphContainer to find it in the project.
         string assetPath = AssetDatabase.GetAssetPath(instanceID);
-        DialogueContainer dialogueContainer = AssetDatabase.LoadAssetAtPath<DialogueContainer>(assetPath);
+        NodesContainer nodesContainer = AssetDatabase.LoadAssetAtPath<NodesContainer>(assetPath);
 
-        if (dialogueContainer != null)
+        if (nodesContainer != null)
         {
             DialogueGraph window = GetWindow<DialogueGraph>();
-            window.titleContent = new GUIContent($"{dialogueContainer.name} (Dialogue Graph)");
+            window.titleContent = new GUIContent($"{nodesContainer.name} (Dialogue Graph)");
             
             //Debug.Log($"Dialogue Container name: {dialogueContainer.name}");
 
             //Once the window is opened, we load the content of the scriptable object.
             //Even if the new name doesn't show up in the TextField, we need to assign the _fileName
             //to load the appropriate file.
-            window._fileName = dialogueContainer.name;
+            window._fileName = nodesContainer.name;
             window.RequestDataOperation(false);
             return true;
         }
