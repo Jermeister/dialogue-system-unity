@@ -27,17 +27,7 @@ public struct DialogueCharacter
     public string characterName;
 }
 
-public class FlowEdge : EdgeConnector
-{
-    protected override void RegisterCallbacksOnTarget()
-    {
-        Debug.Log("Ayyyy");
-    }
 
-    protected override void UnregisterCallbacksFromTarget()
-    {
-        
-    }
+public struct FlowEdge {}
 
-    public override EdgeDragHelper edgeDragHelper { get; }
-}
+public struct CharacterEdge {}

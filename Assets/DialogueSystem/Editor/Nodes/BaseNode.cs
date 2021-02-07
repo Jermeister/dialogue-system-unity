@@ -14,9 +14,9 @@ public class BaseNode : Node
     public bool outputPoint = false;
     
     public readonly Vector2 defaultNodeSize = new Vector2(200,150);
-    protected GraphView graphView;
+    protected DialogueGraphView graphView;
 
-    public BaseNode(NodeType _nodeType, GraphView _graphView)
+    public BaseNode(NodeType _nodeType, DialogueGraphView _graphView)
     {
         graphView = _graphView;
         
@@ -71,7 +71,7 @@ public class BaseNode : Node
     
     protected Port GeneratePort(Direction portDirection, Port.Capacity capacity=Port.Capacity.Single)
     {
-        return InstantiatePort(Orientation.Horizontal, portDirection, capacity, typeof(float));
+        return InstantiatePort(Orientation.Horizontal, portDirection, capacity, typeof(FlowEdge));
     }
     
     protected Port GeneratePortOfType(Direction portDirection, Type type, Port.Capacity capacity=Port.Capacity.Single)

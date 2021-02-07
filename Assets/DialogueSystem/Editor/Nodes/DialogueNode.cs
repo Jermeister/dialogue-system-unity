@@ -5,15 +5,18 @@ using System.Linq;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
+using UnityEditor.UIElements;
 
 public class DialogueNode : BaseNode
 {
     public List<TextField> dialogueTexts;
+    public PopupField<ExposedProperty> characterDropdown;
+    
     public string speaker;
 
     private List<Button> deleteButtons;
 
-    public DialogueNode(Vector3 _position, GraphView _graphView)
+    public DialogueNode(Vector3 _position, DialogueGraphView _graphView)
     {
         graphView = _graphView;
         
@@ -29,31 +32,34 @@ public class DialogueNode : BaseNode
         styleSheets.Add(Resources.Load<StyleSheet>("Node"));
 
         // Generate Input Port
-        var inputPort = GeneratePortOfType(Direction.Input, typeof(FlowEdge), Port.Capacity.Multi);
+        var inputPort = GeneratePort(Direction.Input, Port.Capacity.Multi);
         inputPort.portName = "Input";
         inputContainer.Add(inputPort);
         
-        // Generate Input Port for Character
-        var inputCharacterPort = GeneratePortOfType(Direction.Input, typeof(DialogueCharacter));
+        /*// Generate Input Port for Character
+        var inputCharacterPort = GeneratePortOfType(Direction.Input, typeof(CharacterEdge));
         inputCharacterPort.portName = "Character";
-        inputContainer.Add(inputCharacterPort);
+        inputCharacterPort.portColor = Color.red;
+        inputContainer.Add(inputCharacterPort);*/
         
+        characterDropdown = new PopupField<ExposedProperty>(graphView.exposedProperties, graphView.exposedProperties[0]);
+        inputContainer.Add(characterDropdown);
+
         // Generate Output Port
-        var outputPort = GeneratePortOfType(Direction.Output, typeof(FlowEdge));
+        var outputPort = GeneratePort(Direction.Output, Port.Capacity.Single);
         outputPort.portName = "Output";
         outputContainer.Add(outputPort);
         
         RefreshExpandedState();
         RefreshPorts();
         SetPosition(new Rect(_position, defaultNodeSize));
-        
-        var button = new Button(() => { AddTextField(); });
-        button.text = "Add Text";
+
+        var button = new Button(AddTextField) {text = "Add Text"};
         mainContainer.Add(button);
         
         AddTextField();
     }
-    
+
     private void AddTextField()
     {
         var textField = new TextField(string.Empty);

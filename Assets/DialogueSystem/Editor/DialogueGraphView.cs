@@ -16,6 +16,7 @@ public class DialogueGraphView : GraphView
 
     public Blackboard blackboard;
     public List<ExposedProperty> exposedProperties = new List<ExposedProperty>();
+    public EnumField typeEnum;
     
     private NodeSearchWindow _searchWindow;
 
@@ -34,6 +35,8 @@ public class DialogueGraphView : GraphView
 
         AddElement(GenerateEntryPoint());
         AddSearchWindow(editorWindow);
+
+        typeEnum = new EnumField(new BlackboardType());
     }
 
     private void AddSearchWindow(EditorWindow editorWindow)
@@ -66,17 +69,21 @@ public class DialogueGraphView : GraphView
     
     public void CreateNode(NodeType _nodeType, Vector2 _position = new Vector2())
     {
-        AddElement(CreateDialogueNode(_nodeType, _position));
+        var node = CreateNewNode(_nodeType, _position);
+        AddElement(node);
     }
 
 
-    private BaseNode CreateDialogueNode(NodeType _nodeType, Vector2 _position)
+    private BaseNode CreateNewNode(NodeType _nodeType, Vector2 _position)
     {
         switch (_nodeType)
         {
             case NodeType.StartNode:
                 return new BaseNode(_nodeType, this);
             case NodeType.DialogueNode:
+                AddPropertyToBlackboard();
+                AddPropertyToBlackboard();
+                AddPropertyToBlackboard();
                 return new DialogueNode(_position, this);
             case NodeType.ChoiceNode:
                 return new ChoiceNode(_position, this);
@@ -87,81 +94,53 @@ public class DialogueGraphView : GraphView
         }
     }
 
-    public void AddPropertyToBlackboard(ExposedProperty exposedProperty, bool noCheck = false)
+    public void AddPropertyToBlackboard()
     {
-        // Save local / temp values
-        var localName = exposedProperty.PropertyName;
-        var localValue = exposedProperty.PropertyValue;
-
-        if (!noCheck)
+        switch ((BlackboardType)typeEnum.value)
         {
-            // Find duplicate names and count them
-            int tempCounter = 0;
-            string tempName = localName;
-            while (exposedProperties.Any(x => x.PropertyName == tempName))
-            {
-                tempCounter++;
-                tempName = $"{localName}_{tempCounter}";
-            }
+            case BlackboardType.Character:
+                string propertyName = "newCharacter";
+                CheckPropertyNameAvailability(ref propertyName);
 
-
-            if (tempCounter > 0)
-                localName = $"{localName}_{tempCounter}";
-        
-            var property = new ExposedProperty
-            {
-                PropertyName = localName, 
-                PropertyValue = localValue
-            };
-            exposedProperties.Add(property);
+                var characterProperty = new CharacterProperty(propertyName, "New Value", this);
+                
+                blackboard.Add(characterProperty.propertyElement);
+                exposedProperties.Add(characterProperty);
+                break;
+            default:
+                Debug.Log("BlackboardType.Random not finished");
+                break;
         }
-        
-        var container = new VisualElement();
-        var blackboardField = new BlackboardField{text = localName, typeText = "string"};
-        blackboardField.Q<Label>("typeLabel").style.flexBasis = StyleKeyword.Auto;
-        blackboardField.capabilities &= ~Capabilities.Deletable;
-        
-        blackboardField.RegisterCallback<ContextualMenuPopulateEvent>(PopulateDeleteOption);
-        blackboardField.Add(new Button(() => { RemovePropertyFromBlackboard(localName); }) { text = "X" });
-        
-        container.Add(blackboardField);
-
-        var propertyValueTextField = new TextField("Value:")
-        {
-            value = localValue
-        };
-        propertyValueTextField.Q<Label>().style.minWidth = StyleKeyword.Auto;
-
-        propertyValueTextField.RegisterValueChangedCallback(evt =>
-        {
-            var changingPropertyIndex = exposedProperties.FindIndex(x => x.PropertyName == localName);
-            exposedProperties[changingPropertyIndex].PropertyName = evt.newValue;
-        });
-        
-        var blackboardValueRow = new BlackboardRow(blackboardField, propertyValueTextField);
-        container.Add(blackboardValueRow);
-        
-        blackboard.Add(container);
     }
 
+    public void CheckPropertyNameAvailability(ref string propertyName)
+    {
+        // Find duplicate names and count them
+        int tempCounter = 0;
+        string tempName = propertyName;
+        while (exposedProperties.Any(x => x.PropertyName == tempName))
+        {
+            tempCounter++;
+            tempName = $"{propertyName}_{tempCounter}";
+        }
+        
+        if (tempCounter > 0)
+            propertyName = $"{propertyName}_{tempCounter}";
+        
+        Debug.Log(propertyName);
+    }
 
     void PopulateDeleteOption(ContextualMenuPopulateEvent evt)
     {
         evt.menu.AppendAction("Delete", DeletePropertyFromBlackboard, DropdownMenuAction.AlwaysEnabled, ((BlackboardField)evt.target).text);
     }
     
-    private void RemovePropertyFromBlackboard(string propertyName)
+    public void RemovePropertyFromBlackboard(string propertyName)
     {
         var propertyToRemove = exposedProperties.Find(prop => prop.PropertyName == propertyName);
         exposedProperties.Remove(propertyToRemove);
- 
-        blackboard.Clear();
         
-        //Add properties from data
-        foreach (var exposedProperty in exposedProperties)
-        {
-            AddPropertyToBlackboard(exposedProperty, true);
-        }
+        PopulateBlackboardWithProperties(exposedProperties, true);
     }
 
     void DeletePropertyFromBlackboard(DropdownMenuAction dropdownMenuAction)
@@ -172,9 +151,24 @@ public class DialogueGraphView : GraphView
         }
     }
 
+    public void PopulateBlackboardWithProperties(List<ExposedProperty> properties, bool noCheck)
+    {
+        blackboard.Clear();
+        
+        blackboard.Add(typeEnum);
+        blackboard.Add(new BlackboardSection{title="Exposed properties"});
+        
+        //Add properties from data
+        foreach (var exposedProperty in properties)
+        {
+            AddPropertyToBlackboard();
+        }
+    }
+
     public void ClearExposedProperties()
     {
         exposedProperties.Clear();
         blackboard.Clear();
     }
 }
+

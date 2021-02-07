@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.Experimental.GraphView;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -10,9 +11,10 @@ public class ChoiceNode : BaseNode
 {
     public List<TextField> choiceTexts;
     public TextField dialogueTextField;
+    public PopupField<ExposedProperty> characterDropdown;
     public string speaker;
 
-    public ChoiceNode(Vector3 _position ,GraphView _graphView)
+    public ChoiceNode(Vector3 _position, DialogueGraphView _graphView)
     {
         choiceTexts = new List<TextField>();
         graphView = _graphView;
@@ -30,10 +32,9 @@ public class ChoiceNode : BaseNode
         inputPort.portName = "Input";
         inputContainer.Add(inputPort);
         
-        // Generate Input Port for Character
-        var inputCharacterPort = GeneratePortOfType(Direction.Input, typeof(DialogueCharacter));
-        inputCharacterPort.portName = "Character";
-        inputContainer.Add(inputCharacterPort);
+        // Generate dropdown for Character
+        characterDropdown = new PopupField<ExposedProperty>(graphView.exposedProperties, graphView.exposedProperties[0]);
+        inputContainer.Add(characterDropdown);
         
         RefreshExpandedState();
         RefreshPorts();

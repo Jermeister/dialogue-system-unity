@@ -50,7 +50,7 @@ public class GraphSaveUtility
 
     private void SaveExposedProperties(NodesContainer nodesContainer)
     {
-        nodesContainer.exposedProperties.AddRange(_targetGraphView.exposedProperties);
+        //nodesContainer.exposedProperties.AddRange(_targetGraphView.exposedProperties);
     }
 
 
@@ -117,12 +117,9 @@ public class GraphSaveUtility
 
     private void CreateExposedProperties()
     {
-        _targetGraphView.ClearExposedProperties();
         // Clear existing properties and create new ones from data
-        foreach (var property in _containerCache.exposedProperties)
-        {
-            _targetGraphView.AddPropertyToBlackboard(property);
-        }
+        _targetGraphView.ClearExposedProperties();
+        //_targetGraphView.PopulateBlackboardWithProperties(_containerCache.exposedProperties, false);
     }
 
     private void ConnectNodes()

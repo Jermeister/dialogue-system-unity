@@ -14,6 +14,7 @@ public class DialogueGraph : EditorWindow
     private DialogueGraphView _graphView;
     private string _fileName;
 
+
     [MenuItem("Graph/Dialogue Graph")]
     public static void OpenDialogueGraphWindow()
     {
@@ -27,6 +28,8 @@ public class DialogueGraph : EditorWindow
         GenerateToolbar();
         GenerateBlackBoard();
         GenerateMinimap();
+
+        DisableDifferentPortConnections();
     }
     
 
@@ -34,10 +37,12 @@ public class DialogueGraph : EditorWindow
     {
         var blackboard = new Blackboard(_graphView);
         blackboard.scrollable = true;
+   
+        blackboard.Add(_graphView.typeEnum);
         blackboard.Add(new BlackboardSection{title="Exposed properties"});
         blackboard.addItemRequested = _blackboard =>
         {
-            _graphView.AddPropertyToBlackboard(new ExposedProperty());
+            _graphView.AddPropertyToBlackboard();
         };
 
         blackboard.editTextRequested = (blackboard1, element, newValue) =>
@@ -58,10 +63,10 @@ public class DialogueGraph : EditorWindow
             var propertyIndex = _graphView.exposedProperties.FindIndex(x => x.PropertyName == oldPropertyName);
             _graphView.exposedProperties[propertyIndex].PropertyName = newValue;
 
-            ((BlackboardField) element).text = newValue;
+            //((BlackboardField) element).text = newValue;
         };
         
-        blackboard.SetPosition(new Rect(10, 180, 200, 300));
+        blackboard.SetPosition(new Rect(10, 180, 240, 300));
         
         _graphView.Add(blackboard);
         _graphView.blackboard = blackboard;
@@ -83,7 +88,7 @@ public class DialogueGraph : EditorWindow
 
     private void TestingRandomStuff()
     {
-        _graphView.Q<MiniMap>().Q<Label>().text = "Hello World";
+        _graphView.Q<MiniMap>().Q<Label>().text = "";
     }
 
 
@@ -93,9 +98,28 @@ public class DialogueGraph : EditorWindow
         {
             name = "Dialogue Graph Editor"
         };
-        
+
         _graphView.StretchToParentSize();
         rootVisualElement.Add(_graphView);
+    }
+
+    private void DisableDifferentPortConnections()
+    {
+        _graphView.graphViewChanged += x =>
+        {
+            if (x.edgesToCreate != null)
+            {
+                var tempList = new List<Edge>(x.edgesToCreate);
+                foreach (var edge in tempList)
+                {
+                    if (edge.input.portType != edge.output.portType)
+                    {
+                        x.edgesToCreate.Remove(edge);
+                    }
+                }
+            }
+            return default;
+        }; 
     }
 
     private void GenerateToolbar()
