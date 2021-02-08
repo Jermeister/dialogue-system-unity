@@ -45,25 +45,20 @@ public class DialogueGraph : EditorWindow
             _graphView.AddPropertyToBlackboard();
         };
 
-        blackboard.editTextRequested = (blackboard1, element, newValue) =>
+        blackboard.editTextRequested = (bb, element, newValue) =>
         {
             var oldPropertyName = ((BlackboardField) element).text;
             
             var tempCounter = 0;
-            string tempName = newValue;
-            while (_graphView.exposedProperties.Any(x => x.PropertyName == tempName))
-            {
-                tempCounter++;
-                tempName = $"{newValue}_{tempCounter}";
-            }
             
-            if (tempCounter > 0)
-                newValue = $"{newValue}_{tempCounter}";
+            if (newValue == null)
+                return;
+
+            _graphView.CheckPropertyNameAvailability(ref newValue);
 
             var propertyIndex = _graphView.exposedProperties.FindIndex(x => x.PropertyName == oldPropertyName);
             _graphView.exposedProperties[propertyIndex].PropertyName = newValue;
-
-            //((BlackboardField) element).text = newValue;
+            ((BlackboardField) element).text = newValue;
         };
         
         blackboard.SetPosition(new Rect(10, 180, 240, 300));

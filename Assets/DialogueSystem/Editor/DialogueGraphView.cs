@@ -81,9 +81,6 @@ public class DialogueGraphView : GraphView
             case NodeType.StartNode:
                 return new BaseNode(_nodeType, this);
             case NodeType.DialogueNode:
-                AddPropertyToBlackboard();
-                AddPropertyToBlackboard();
-                AddPropertyToBlackboard();
                 return new DialogueNode(_position, this);
             case NodeType.ChoiceNode:
                 return new ChoiceNode(_position, this);
@@ -96,20 +93,33 @@ public class DialogueGraphView : GraphView
 
     public void AddPropertyToBlackboard()
     {
-        switch ((BlackboardType)typeEnum.value)
+        switch ((BlackboardType) typeEnum.value)
         {
             case BlackboardType.Character:
                 string propertyName = "newCharacter";
                 CheckPropertyNameAvailability(ref propertyName);
 
                 var characterProperty = new CharacterProperty(propertyName, "New Value", this);
-                
+
                 blackboard.Add(characterProperty.propertyElement);
                 exposedProperties.Add(characterProperty);
                 break;
             default:
-                Debug.Log("BlackboardType.Random not finished");
+                Debug.Log("Default should not be hit");
                 break;
+        }
+    }
+
+    public void PopulateBlackboardNoCheck()
+    {
+        blackboard.Clear();
+        
+        blackboard.Add(typeEnum);
+        blackboard.Add(new BlackboardSection{title="Exposed properties"});
+        
+        foreach (var property in exposedProperties)
+        {
+            blackboard.Add(property.propertyElement);
         }
     }
 
@@ -126,8 +136,6 @@ public class DialogueGraphView : GraphView
         
         if (tempCounter > 0)
             propertyName = $"{propertyName}_{tempCounter}";
-        
-        Debug.Log(propertyName);
     }
 
     void PopulateDeleteOption(ContextualMenuPopulateEvent evt)
@@ -137,10 +145,10 @@ public class DialogueGraphView : GraphView
     
     public void RemovePropertyFromBlackboard(string propertyName)
     {
-        var propertyToRemove = exposedProperties.Find(prop => prop.PropertyName == propertyName);
-        exposedProperties.Remove(propertyToRemove);
+        var propertyToRemoveId = exposedProperties.FindIndex(prop => prop.PropertyName == propertyName);
+        exposedProperties.RemoveAt(propertyToRemoveId);
         
-        PopulateBlackboardWithProperties(exposedProperties, true);
+        PopulateBlackboardNoCheck();
     }
 
     void DeletePropertyFromBlackboard(DropdownMenuAction dropdownMenuAction)
@@ -148,20 +156,6 @@ public class DialogueGraphView : GraphView
         if (dropdownMenuAction.name == "Delete")
         {
             RemovePropertyFromBlackboard(dropdownMenuAction.userData.ToString());
-        }
-    }
-
-    public void PopulateBlackboardWithProperties(List<ExposedProperty> properties, bool noCheck)
-    {
-        blackboard.Clear();
-        
-        blackboard.Add(typeEnum);
-        blackboard.Add(new BlackboardSection{title="Exposed properties"});
-        
-        //Add properties from data
-        foreach (var exposedProperty in properties)
-        {
-            AddPropertyToBlackboard();
         }
     }
 

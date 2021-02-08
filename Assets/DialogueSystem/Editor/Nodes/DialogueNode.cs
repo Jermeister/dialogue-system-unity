@@ -35,13 +35,7 @@ public class DialogueNode : BaseNode
         var inputPort = GeneratePort(Direction.Input, Port.Capacity.Multi);
         inputPort.portName = "Input";
         inputContainer.Add(inputPort);
-        
-        /*// Generate Input Port for Character
-        var inputCharacterPort = GeneratePortOfType(Direction.Input, typeof(CharacterEdge));
-        inputCharacterPort.portName = "Character";
-        inputCharacterPort.portColor = Color.red;
-        inputContainer.Add(inputCharacterPort);*/
-        
+
         characterDropdown = new PopupField<ExposedProperty>(graphView.exposedProperties, graphView.exposedProperties[0]);
         inputContainer.Add(characterDropdown);
 

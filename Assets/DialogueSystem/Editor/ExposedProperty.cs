@@ -42,11 +42,12 @@ public class CharacterProperty : ExposedProperty
         
         propertyElement = new VisualElement();
         var blackboardField = new BlackboardField{text = propertyName, typeText = "Character"};
+
         blackboardField.Q<Label>("typeLabel").style.flexBasis = StyleKeyword.Auto;
         blackboardField.capabilities &= ~Capabilities.Deletable;
         
         blackboardField.RegisterCallback<ContextualMenuPopulateEvent>(PopulateDeleteOption);
-        blackboardField.Add(new Button(() => { graphView.RemovePropertyFromBlackboard(PropertyValue); }) { text = "X" });
+        blackboardField.Add(new Button(() => { graphView.RemovePropertyFromBlackboard(this.PropertyName); }) { text = "X" });
         
         propertyElement.Add(blackboardField);
 
@@ -58,8 +59,13 @@ public class CharacterProperty : ExposedProperty
 
         propertyValueTextField.RegisterValueChangedCallback(evt =>
         {
-            var changingPropertyIndex = graphView.exposedProperties.FindIndex(x => x.PropertyName == PropertyValue);
-            graphView.exposedProperties[changingPropertyIndex].PropertyName = evt.newValue;
+            var changingPropertyIndex = graphView.exposedProperties.FindIndex(x => x.PropertyName == this.PropertyName);
+            
+            if (changingPropertyIndex < 0)
+                return;
+            
+            graphView.exposedProperties[changingPropertyIndex].PropertyValue = evt.newValue;
+            propertyValueTextField.value = evt.newValue;
         });
         
         var blackboardValueRow = new BlackboardRow(blackboardField, propertyValueTextField);
