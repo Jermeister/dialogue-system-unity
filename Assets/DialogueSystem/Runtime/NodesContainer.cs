@@ -7,5 +7,7 @@ public class NodesContainer : ScriptableObject
 {
     public List<NodeLinkData> nodeLinks = new List<NodeLinkData>();
     public List<BaseNodeData> baseNodesData = new List<BaseNodeData>();
-    //public List<ExposedProperty> exposedProperties = new List<ExposedProperty>();
+    public List<DialogueNodeData> dialogueNodesData = new List<DialogueNodeData>();
+    public List<ChoiceNodeData> choiceNodesData = new List<ChoiceNodeData>();
+    public List<ExposedPropertyData> exposedProperties = new List<ExposedPropertyData>();
 }

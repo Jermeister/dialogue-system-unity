@@ -85,7 +85,7 @@ public class DialogueGraphView : GraphView
             case NodeType.ChoiceNode:
                 return new ChoiceNode(_position, this);
             case NodeType.EndNode:
-                return new BaseNode(_nodeType, this);
+                return new BaseNode(_nodeType, this, _position);
             default:
                 return null;
         }
@@ -95,8 +95,16 @@ public class DialogueGraphView : GraphView
     {
         switch ((BlackboardType) typeEnum.value)
         {
+            case BlackboardType.None:
+                if (exposedProperties.Count > 0)
+                    return;
+                
+                var noneProperty = new NoneProperty() {PropertyName = "None", propertyType = BlackboardType.None, PropertyValue = "None"};
+                exposedProperties.Add(noneProperty);
+                break;
+            
             case BlackboardType.Character:
-                string propertyName = "newCharacter";
+                var propertyName = "New_Character";
                 CheckPropertyNameAvailability(ref propertyName);
 
                 var characterProperty = new CharacterProperty(propertyName, "New Value", this);
@@ -119,7 +127,8 @@ public class DialogueGraphView : GraphView
         
         foreach (var property in exposedProperties)
         {
-            blackboard.Add(property.propertyElement);
+            if (property.propertyType != BlackboardType.None)
+                blackboard.Add(property.propertyElement);
         }
     }
 

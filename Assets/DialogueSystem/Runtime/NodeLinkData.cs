@@ -5,7 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public struct NodeLinkData
 {
-    public string baseNodeGuid;
+    public string thisNodeGuid;
     public string portName;
-    public string targetNodeGuid;
+    public string nextNodeGuid;
 }

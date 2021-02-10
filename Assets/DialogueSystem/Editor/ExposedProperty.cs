@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 
 [System.Serializable]
-public abstract class ExposedProperty
+public class ExposedProperty
 {
     public string PropertyName = "New String";
     public string PropertyValue = "New Value";
@@ -30,7 +30,17 @@ public abstract class ExposedProperty
     }
 }
 
+public class NoneProperty : ExposedProperty
+{
+    public NoneProperty() { }
+    
+    public override string ToString()
+    {
+        return PropertyName;
+    }
+}
 
+[System.Serializable]
 public class CharacterProperty : ExposedProperty
 {
     public CharacterProperty(string propertyName, string propertyValue, DialogueGraphView dialogueGraphView)
@@ -76,10 +86,4 @@ public class CharacterProperty : ExposedProperty
     {
         return PropertyName;
     }
-}
-
-[System.Serializable]
-public enum BlackboardType
-{
-    Character,
 }

@@ -50,7 +50,19 @@ public class GraphSaveUtility
 
     private void SaveExposedProperties(NodesContainer nodesContainer)
     {
-        //nodesContainer.exposedProperties.AddRange(_targetGraphView.exposedProperties);
+        var exposedPropertiesData = new List<ExposedPropertyData>();
+
+        foreach (var property in _targetGraphView.exposedProperties)
+        {
+            exposedPropertiesData.Add(new ExposedPropertyData()
+            {
+                propertyType = property.propertyType,
+                propertyName = property.PropertyName,
+                propertyValue = property.PropertyValue,
+            });
+        }
+
+        nodesContainer.exposedProperties = exposedPropertiesData;
     }
 
 
@@ -80,9 +92,9 @@ public class GraphSaveUtility
             
             nodesContainer.nodeLinks.Add(new NodeLinkData
             {
-                baseNodeGuid = outputNode.guid,
+                thisNodeGuid = outputNode.guid,
                 portName = connectedPorts[i].output.portName,
-                targetNodeGuid = inputNode.guid
+                nextNodeGuid = inputNode.guid
             });
         }
 
@@ -93,7 +105,38 @@ public class GraphSaveUtility
                 guid = node.guid,
                 nodeName = node.nodeName,
                 position = node.GetPosition().position,
+                nodeType = node.nodeType,
             });
+
+            switch (node.nodeType)
+            {
+                case NodeType.DialogueNode:
+                    var dialogueNode = node as DialogueNode;
+                    var textsList = new List<string>();
+                    
+                    foreach (var textField in dialogueNode.dialogueTexts)
+                    {
+                        textsList.Add(textField.text);
+                    }
+
+                    nodesContainer.dialogueNodesData.Add(new DialogueNodeData()
+                    {
+                        guid = node.guid,
+                        speaker = dialogueNode?.speaker,
+                        dialogueTexts = textsList,
+                    });
+                    break;
+                case NodeType.ChoiceNode:
+                    var choiceNode = node as ChoiceNode;
+
+                    nodesContainer.choiceNodesData.Add(new ChoiceNodeData()
+                    {
+                        guid = node.guid,
+                        speaker = choiceNode.speaker,
+                        dialogueText = choiceNode.dialogueTextField.text,
+                    });
+                    break;
+            }
         }
 
         return true;
@@ -126,11 +169,11 @@ public class GraphSaveUtility
     {
         for (int i = 0; i < nodes.Count; i++)
         {
-            var connections = _containerCache.nodeLinks.Where(x => x.baseNodeGuid == nodes[i].guid).ToList();
+            var connections = _containerCache.nodeLinks.Where(x => x.thisNodeGuid == nodes[i].guid).ToList();
 
             for (int j = 0; j < connections.Count; j++)
             {
-                var targetNodeGuid = connections[j].targetNodeGuid;
+                var targetNodeGuid = connections[j].nextNodeGuid;
                 var targetNode = nodes.First(x => x.guid == targetNodeGuid);
                 LinkNodes(nodes[i].outputContainer[j].Q<Port>(), (Port) targetNode.inputContainer[0]);
                 
@@ -180,7 +223,7 @@ public class GraphSaveUtility
     private void ClearGraph()
     {
         // Set entry points guid back from the save, discard existing guid.
-        nodes.Find(x => x.inputPoint).guid = _containerCache.nodeLinks[0].baseNodeGuid;
+        nodes.Find(x => x.inputPoint).guid = _containerCache.nodeLinks[0].thisNodeGuid;
 
         foreach (var node in nodes)
         {

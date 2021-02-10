@@ -65,6 +65,8 @@ public class DialogueGraph : EditorWindow
         
         _graphView.Add(blackboard);
         _graphView.blackboard = blackboard;
+        
+        _graphView.AddPropertyToBlackboard();
     }
 
     private void GenerateMinimap()

@@ -14,33 +14,37 @@ public class BaseNode : Node
     public bool outputPoint = false;
     
     public readonly Vector2 defaultNodeSize = new Vector2(200,150);
+    public readonly Vector2 defaultPosition = new Vector2(300, 250);
     protected DialogueGraphView graphView;
 
-    public BaseNode(NodeType _nodeType, DialogueGraphView _graphView)
+    public BaseNode(NodeType _nodeType, DialogueGraphView _graphView, Vector2 position = default)
     {
         graphView = _graphView;
-        
+
+        if (position == default)
+            position = defaultPosition;
+
         switch (_nodeType)
         {
             case NodeType.StartNode:
-                SetupStartNode();
+                SetupStartNode(position);
                 break;
             case NodeType.EndNode:
-                SetupEndNode();
+                SetupEndNode(position);
                 break;
         }
     }
 
     public BaseNode() { }
 
-    protected void SetupStartNode()
+    protected void SetupStartNode(Vector2 position)
     {
         title = "Start";
         guid = Guid.NewGuid().ToString();
         outputPoint = true;
         inputPoint = false;
         
-        SetPosition(new Rect(250, 300, defaultNodeSize.x, defaultNodeSize.y));
+        SetPosition(new Rect(position.x, position.y, defaultNodeSize.x, defaultNodeSize.y));
         
         var outputPort = GeneratePort(Direction.Output);
         outputPort.portName = "Start";
@@ -52,14 +56,14 @@ public class BaseNode : Node
         RefreshPorts();
     }
 
-    protected void SetupEndNode()
+    protected void SetupEndNode(Vector2 position)
     {
         title = "End";
         guid = Guid.NewGuid().ToString();
         outputPoint = false;
         inputPoint = true;
         
-        SetPosition(new Rect(550, 300, defaultNodeSize.x, defaultNodeSize.y));
+        SetPosition(new Rect(position.x, position.y, defaultNodeSize.x, defaultNodeSize.y));
         
         var inputPort = GeneratePort(Direction.Input, Port.Capacity.Multi);
         inputPort.portName = "End";

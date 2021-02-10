@@ -33,7 +33,7 @@ public class ChoiceNode : BaseNode
         inputContainer.Add(inputPort);
         
         // Generate dropdown for Character
-        characterDropdown = new PopupField<ExposedProperty>(graphView.exposedProperties, graphView.exposedProperties[0]);
+        characterDropdown = new PopupField<ExposedProperty>( _graphView.exposedProperties, 0);
         inputContainer.Add(characterDropdown);
         
         RefreshExpandedState();
