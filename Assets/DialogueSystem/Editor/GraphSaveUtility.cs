@@ -13,7 +13,7 @@ public class GraphSaveUtility
     private NodesContainer _containerCache;
 
     private List<Edge> edges => _targetGraphView.edges.ToList();
-    private List<BaseNode> nodes => _targetGraphView.nodes.ToList().Cast<BaseNode>().ToList();
+    private List<Node> nodes => _targetGraphView.nodes.ToList();
     
     public static GraphSaveUtility GetInstance(DialogueGraphView targetGraphView)
     {
@@ -98,17 +98,18 @@ public class GraphSaveUtility
             });
         }
 
-        foreach (var node in nodes.Where(node => !node.inputPoint))
+        foreach (var node in nodes)
         {
+            var baseNode = node as BaseNode;
             nodesContainer.baseNodesData.Add(new BaseNodeData()
             {
-                guid = node.guid,
-                nodeName = node.nodeName,
-                position = node.GetPosition().position,
-                nodeType = node.nodeType,
+                guid = baseNode.guid,
+                nodeName = baseNode.nodeName,
+                position = baseNode.GetPosition().position,
+                nodeType = baseNode.nodeType,
             });
 
-            switch (node.nodeType)
+            switch (baseNode.nodeType)
             {
                 case NodeType.DialogueNode:
                     var dialogueNode = node as DialogueNode;
@@ -121,8 +122,8 @@ public class GraphSaveUtility
 
                     nodesContainer.dialogueNodesData.Add(new DialogueNodeData()
                     {
-                        guid = node.guid,
-                        speaker = dialogueNode?.speaker,
+                        guid = baseNode.guid,
+                        speaker = dialogueNode?.characterDropdown.value.PropertyName,
                         dialogueTexts = textsList,
                     });
                     break;
@@ -131,8 +132,8 @@ public class GraphSaveUtility
 
                     nodesContainer.choiceNodesData.Add(new ChoiceNodeData()
                     {
-                        guid = node.guid,
-                        speaker = choiceNode.speaker,
+                        guid = baseNode.guid,
+                        speaker = choiceNode.characterDropdown.value.PropertyName,
                         dialogueText = choiceNode.dialogueTextField.text,
                     });
                     break;
@@ -162,20 +163,21 @@ public class GraphSaveUtility
     {
         // Clear existing properties and create new ones from data
         _targetGraphView.ClearExposedProperties();
-        //_targetGraphView.PopulateBlackboardWithProperties(_containerCache.exposedProperties, false);
+        _targetGraphView.AddExposedPropertiesFromData(_containerCache.exposedProperties);
     }
 
     private void ConnectNodes()
     {
-        for (int i = 0; i < nodes.Count; i++)
+        var baseNodes = nodes.Cast<BaseNode>().ToList();
+        for (int i = 0; i < baseNodes.Count; i++)
         {
-            var connections = _containerCache.nodeLinks.Where(x => x.thisNodeGuid == nodes[i].guid).ToList();
+            var connections = _containerCache.nodeLinks.Where(x => x.thisNodeGuid == baseNodes[i].guid).ToList();
 
             for (int j = 0; j < connections.Count; j++)
             {
                 var targetNodeGuid = connections[j].nextNodeGuid;
-                var targetNode = nodes.First(x => x.guid == targetNodeGuid);
-                LinkNodes(nodes[i].outputContainer[j].Q<Port>(), (Port) targetNode.inputContainer[0]);
+                var targetNode = baseNodes.First(x => x.guid == targetNodeGuid);
+                LinkNodes(baseNodes[i].outputContainer[j].Q<Port>(), (Port) targetNode.inputContainer[0]);
                 
                 targetNode.SetPosition(new Rect(_containerCache.baseNodesData.First(x => x.guid == targetNodeGuid).position, _targetGraphView.defaultNodeSize));
             }
@@ -222,10 +224,11 @@ public class GraphSaveUtility
 
     private void ClearGraph()
     {
+        var baseNodes = nodes.Cast<BaseNode>().ToList();
         // Set entry points guid back from the save, discard existing guid.
-        nodes.Find(x => x.inputPoint).guid = _containerCache.nodeLinks[0].thisNodeGuid;
+        baseNodes.Find(x => x.inputPoint).guid = _containerCache.nodeLinks[0].thisNodeGuid;
 
-        foreach (var node in nodes)
+        foreach (var node in baseNodes)
         {
             if (node.inputPoint) continue;
 

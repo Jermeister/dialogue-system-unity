@@ -12,7 +12,6 @@ public class ChoiceNode : BaseNode
     public List<TextField> choiceTexts;
     public TextField dialogueTextField;
     public PopupField<ExposedProperty> characterDropdown;
-    public string speaker;
 
     public ChoiceNode(Vector3 _position, DialogueGraphView _graphView)
     {
@@ -22,6 +21,7 @@ public class ChoiceNode : BaseNode
         nodeName = "Choice Node";
         title = nodeName;
         guid = Guid.NewGuid().ToString();
+        nodeType = NodeType.ChoiceNode;
         inputPoint = true;
         outputPoint = true;
 

@@ -11,9 +11,6 @@ public class DialogueNode : BaseNode
 {
     public List<TextField> dialogueTexts;
     public PopupField<ExposedProperty> characterDropdown;
-    
-    public string speaker;
-
     private List<Button> deleteButtons;
 
     public DialogueNode(Vector3 _position, DialogueGraphView _graphView)
@@ -23,6 +20,7 @@ public class DialogueNode : BaseNode
         nodeName = "Dialogue Node";
         title = nodeName;
         guid = Guid.NewGuid().ToString();
+        nodeType = NodeType.DialogueNode;
         inputPoint = true;
         outputPoint = true;
         

@@ -118,7 +118,22 @@ public class DialogueGraphView : GraphView
         }
     }
 
-    public void PopulateBlackboardNoCheck()
+    public void AddExposedPropertiesFromData(List<ExposedPropertyData> propertiesData)
+    {
+        foreach (var property in propertiesData)
+        {
+            exposedProperties.Add(new ExposedProperty()
+            {
+                PropertyName = property.propertyName,
+                PropertyValue = property.propertyValue,
+                propertyType = property.propertyType,
+            });
+        }
+        
+        RepaintBlackboardNoCheck();
+    }
+
+    public void RepaintBlackboardNoCheck()
     {
         blackboard.Clear();
         
@@ -157,7 +172,7 @@ public class DialogueGraphView : GraphView
         var propertyToRemoveId = exposedProperties.FindIndex(prop => prop.PropertyName == propertyName);
         exposedProperties.RemoveAt(propertyToRemoveId);
         
-        PopulateBlackboardNoCheck();
+        RepaintBlackboardNoCheck();
     }
 
     void DeletePropertyFromBlackboard(DropdownMenuAction dropdownMenuAction)

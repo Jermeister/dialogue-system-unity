@@ -41,6 +41,7 @@ public class BaseNode : Node
     {
         title = "Start";
         guid = Guid.NewGuid().ToString();
+        nodeType = NodeType.StartNode;
         outputPoint = true;
         inputPoint = false;
         
@@ -60,6 +61,7 @@ public class BaseNode : Node
     {
         title = "End";
         guid = Guid.NewGuid().ToString();
+        nodeType = NodeType.EndNode;
         outputPoint = false;
         inputPoint = true;
         
