@@ -17,7 +17,7 @@ public class BaseNode : Node
     public readonly Vector2 defaultPosition = new Vector2(300, 250);
     protected DialogueGraphView graphView;
 
-    public BaseNode(NodeType _nodeType, DialogueGraphView _graphView, Vector2 position = default)
+    public BaseNode(NodeType _nodeType, DialogueGraphView _graphView, Vector2 position = default, string nodeGuid = null)
     {
         graphView = _graphView;
 
@@ -27,20 +27,25 @@ public class BaseNode : Node
         switch (_nodeType)
         {
             case NodeType.StartNode:
-                SetupStartNode(position);
+                SetupStartNode(position, nodeGuid);
                 break;
             case NodeType.EndNode:
-                SetupEndNode(position);
+                SetupEndNode(position, nodeGuid);
                 break;
         }
     }
 
     public BaseNode() { }
 
-    protected void SetupStartNode(Vector2 position)
+    protected void SetupStartNode(Vector2 position, string nodeGuid = null)
     {
         title = "Start";
-        guid = Guid.NewGuid().ToString();
+
+        if (nodeGuid == null)
+            guid = Guid.NewGuid().ToString();
+        else
+            guid = nodeGuid;
+        
         nodeType = NodeType.StartNode;
         outputPoint = true;
         inputPoint = false;
@@ -57,10 +62,15 @@ public class BaseNode : Node
         RefreshPorts();
     }
 
-    protected void SetupEndNode(Vector2 position)
+    protected void SetupEndNode(Vector2 position, string nodeGuid = null)
     {
         title = "End";
-        guid = Guid.NewGuid().ToString();
+        
+        if (nodeGuid == null)
+            guid = Guid.NewGuid().ToString();
+        else
+            guid = nodeGuid;
+        
         nodeType = NodeType.EndNode;
         outputPoint = false;
         inputPoint = true;
@@ -69,7 +79,7 @@ public class BaseNode : Node
         
         var inputPort = GeneratePort(Direction.Input, Port.Capacity.Multi);
         inputPort.portName = "End";
-        outputContainer.Add(inputPort);
+        inputContainer.Add(inputPort);
 
         RefreshExpandedState();
         RefreshPorts();

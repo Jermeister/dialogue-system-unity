@@ -15,37 +15,66 @@ public class ChoiceNode : BaseNode
 
     public ChoiceNode(Vector3 _position, DialogueGraphView _graphView)
     {
-        choiceTexts = new List<TextField>();
         graphView = _graphView;
         
-        nodeName = "Choice Node";
+        Initialize();
+        SetupInputPort();
+        
+        // Generate dropdown for Character
+        SetupCharacterSelection(0);
+
+        RefreshExpandedState();
+        RefreshPorts();
+        SetPosition(new Rect(_position, defaultNodeSize));
+
+        AddChoicePort();
+    }
+
+    public ChoiceNode(DialogueGraphView _graphView, BaseNodeData baseData, ChoiceNodeData choiceNodeData, List<NodeLinkData> choicePorts)
+    {
+        graphView = _graphView;
+        
+        Initialize(baseData.nodeName, baseData.guid, choiceNodeData.dialogueText);
+        SetupInputPort();
+        
+        // Generate dropdown for Character
+        var propertyIndex = _graphView.exposedProperties.FindIndex(x => x.PropertyName == choiceNodeData.speaker);
+        SetupCharacterSelection(0);
+
+        RefreshExpandedState();
+        RefreshPorts();
+        SetPosition(new Rect(baseData.position, defaultNodeSize));
+
+        foreach (var port in choicePorts)
+        {
+            AddChoicePort(port.portName);
+        }
+    }
+
+    private void Initialize(string nName = "Choice Node", string nodeGuid = null, string dialogueText = "Insert text..")
+    {
+        choiceTexts = new List<TextField>();
+
+        nodeName = nName;
         title = nodeName;
-        guid = Guid.NewGuid().ToString();
+        
+        if (nodeGuid != null)
+            guid = nodeGuid;
+        else
+            guid = Guid.NewGuid().ToString();
+        
         nodeType = NodeType.ChoiceNode;
         inputPoint = true;
         outputPoint = true;
 
         styleSheets.Add(Resources.Load<StyleSheet>("Node"));
-
-        // Generate Input Port
-        var inputPort = GeneratePort(Direction.Input, Port.Capacity.Multi);
-        inputPort.portName = "Input";
-        inputContainer.Add(inputPort);
-        
-        // Generate dropdown for Character
-        characterDropdown = new PopupField<ExposedProperty>( _graphView.exposedProperties, 0);
-        inputContainer.Add(characterDropdown);
-        
-        RefreshExpandedState();
-        RefreshPorts();
-        SetPosition(new Rect(_position, defaultNodeSize));
         
         var button = new Button(() => { AddChoicePort(); });
         button.text = "Add Choice";
         titleContainer.Add(button);
         
         dialogueTextField = new TextField(string.Empty);
-        dialogueTextField.value = "Insert text..";
+        dialogueTextField.value = dialogueText;
 
         dialogueTextField.RegisterValueChangedCallback(evt =>
         {
@@ -53,11 +82,23 @@ public class ChoiceNode : BaseNode
         });
 
         mainContainer.Add(dialogueTextField);
-        
-        AddChoicePort();
+    }
+
+    private void SetupInputPort()
+    {
+        // Generate Input Port
+        var inputPort = GeneratePort(Direction.Input, Port.Capacity.Multi);
+        inputPort.portName = "Input";
+        inputContainer.Add(inputPort);
     }
     
-    private void AddChoicePort(string overridePortName = "")
+    private void SetupCharacterSelection(int propertyIndex)
+    {
+        characterDropdown = new PopupField<ExposedProperty>(graphView.exposedProperties, graphView.exposedProperties[propertyIndex]);
+        inputContainer.Add(characterDropdown);
+    }
+    
+    private void AddChoicePort(string overridePortName = null)
     {
         var generatedPort = GeneratePort(Direction.Output);
 

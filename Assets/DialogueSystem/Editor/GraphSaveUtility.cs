@@ -154,9 +154,9 @@ public class GraphSaveUtility
         }
 
         ClearGraph();
+        CreateExposedProperties();
         CreateNodes();
         ConnectNodes();
-        CreateExposedProperties();
     }
 
     private void CreateExposedProperties()
@@ -177,9 +177,11 @@ public class GraphSaveUtility
             {
                 var targetNodeGuid = connections[j].nextNodeGuid;
                 var targetNode = baseNodes.First(x => x.guid == targetNodeGuid);
-                LinkNodes(baseNodes[i].outputContainer[j].Q<Port>(), (Port) targetNode.inputContainer[0]);
                 
-                targetNode.SetPosition(new Rect(_containerCache.baseNodesData.First(x => x.guid == targetNodeGuid).position, _targetGraphView.defaultNodeSize));
+                if (targetNode == null || targetNode.inputContainer.childCount == 0)
+                    continue;
+                
+                LinkNodes(baseNodes[i].outputContainer[j].Q<Port>(), (Port) targetNode.inputContainer[0]);
             }
         }
     }
@@ -202,21 +204,26 @@ public class GraphSaveUtility
     {
         foreach (var nodeData in _containerCache.baseNodesData)
         {
-            // TODO: Make separate Creates for all types of Nodes
             switch (nodeData.nodeType)
             {
                 case NodeType.StartNode:
+                    var startNode = new BaseNode(nodeData.nodeType, _targetGraphView, nodeData.position, nodeData.guid);
+                    _targetGraphView.AddElement(startNode);
                     break;
                 case NodeType.DialogueNode:
-                    //var tempNode = _targetGraphView.CreateDialogueNode(nodeData.dialogueName, nodeData.dialogueText, Vector2.zero);
-                    //tempNode.guid = nodeData.guid;
-                    //_targetGraphView.AddElement(tempNode);
-                    //var nodePorts = _containerCache.nodeLinks.Where(x => x.baseNodeGuid == nodeData.guid).ToList();
-                    //nodePorts.ForEach(x => _targetGraphView.AddChoicePort(tempNode, x.portName));
+                    DialogueNodeData dialogueData = _containerCache.dialogueNodesData.Find(x => x.guid == nodeData.guid);
+                    var dialogueNode = new DialogueNode(_targetGraphView, nodeData, dialogueData);
+                    _targetGraphView.AddElement(dialogueNode);
                     break;
                 case NodeType.ChoiceNode:
+                    ChoiceNodeData choiceData = _containerCache.choiceNodesData.Find(x => x.guid == nodeData.guid);
+                    var nodePorts = _containerCache.nodeLinks.Where(x => x.thisNodeGuid == nodeData.guid).ToList();
+                    var choiceNode = new ChoiceNode(_targetGraphView, nodeData, choiceData, nodePorts);
+                    _targetGraphView.AddElement(choiceNode);
                     break;
                 case NodeType.EndNode:
+                    var endNode = new BaseNode(nodeData.nodeType, _targetGraphView, nodeData.position, nodeData.guid);
+                    _targetGraphView.AddElement(endNode);
                     break;
             }
         }
@@ -225,8 +232,12 @@ public class GraphSaveUtility
     private void ClearGraph()
     {
         var baseNodes = nodes.Cast<BaseNode>().ToList();
+
+        if (!_containerCache || _containerCache.nodeLinks == null || baseNodes.Count == 0)
+            return;
+        
         // Set entry points guid back from the save, discard existing guid.
-        baseNodes.Find(x => x.inputPoint).guid = _containerCache.nodeLinks[0].thisNodeGuid;
+        //baseNodes.Find(x => x.inputPoint).guid = _containerCache.nodeLinks[0].thisNodeGuid;
 
         foreach (var node in baseNodes)
         {

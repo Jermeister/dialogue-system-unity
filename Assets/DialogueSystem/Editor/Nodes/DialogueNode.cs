@@ -17,45 +17,86 @@ public class DialogueNode : BaseNode
     {
         graphView = _graphView;
         
-        nodeName = "Dialogue Node";
+        Initialize("Dialogue Node", Guid.NewGuid().ToString());
+        SetupPorts();
+
+        SetupCharacterSelection(0);
+
+        RefreshExpandedState();
+        RefreshPorts();
+        SetPosition(new Rect(_position, defaultNodeSize));
+        
+        AddTextField();
+    }
+
+    public DialogueNode(DialogueGraphView _graphView, BaseNodeData baseData, DialogueNodeData dialogueData)
+    {
+        graphView = _graphView;
+        
+        Initialize(baseData.nodeName, baseData.guid);
+        SetupPorts();
+
+        var propertyIndex = _graphView.exposedProperties.FindIndex(x => x.PropertyName == dialogueData.speaker);
+        SetupCharacterSelection(propertyIndex);
+        
+        SetPosition(new Rect(baseData.position, defaultNodeSize));
+        RefreshExpandedState();
+        RefreshPorts();
+        
+
+        foreach (var text in dialogueData.dialogueTexts)
+        {
+            AddTextField(text);
+        }
+    }
+
+    private void Initialize(string nName = "Dialogue Node", string nodeGuid = null)
+    {
+        nodeName = nName;
         title = nodeName;
-        guid = Guid.NewGuid().ToString();
+        guid = nodeGuid;
         nodeType = NodeType.DialogueNode;
-        inputPoint = true;
-        outputPoint = true;
         
         dialogueTexts = new List<TextField>();
         deleteButtons = new List<Button>();
 
         styleSheets.Add(Resources.Load<StyleSheet>("Node"));
+        
+        var button = new Button(AddTextField) {text = "Add Text"};
+        mainContainer.Add(button);
+    }
 
+    private void SetupPorts()
+    {
+        inputPoint = true;
+        outputPoint = true;
+        
         // Generate Input Port
         var inputPort = GeneratePort(Direction.Input, Port.Capacity.Multi);
         inputPort.portName = "Input";
         inputContainer.Add(inputPort);
-
-        characterDropdown = new PopupField<ExposedProperty>(graphView.exposedProperties, graphView.exposedProperties[0]);
-        inputContainer.Add(characterDropdown);
-
+        
         // Generate Output Port
         var outputPort = GeneratePort(Direction.Output, Port.Capacity.Single);
         outputPort.portName = "Output";
         outputContainer.Add(outputPort);
-        
-        RefreshExpandedState();
-        RefreshPorts();
-        SetPosition(new Rect(_position, defaultNodeSize));
-
-        var button = new Button(AddTextField) {text = "Add Text"};
-        mainContainer.Add(button);
-        
-        AddTextField();
     }
 
+    private void SetupCharacterSelection(int propertyIndex)
+    {
+        characterDropdown = new PopupField<ExposedProperty>(graphView.exposedProperties, graphView.exposedProperties[propertyIndex]);
+        inputContainer.Add(characterDropdown);
+    }
+    
     private void AddTextField()
     {
+        AddTextField("Insert text..");
+    }
+    
+    private void AddTextField(string textFieldText)
+    {
         var textField = new TextField(string.Empty);
-        textField.value = "Insert text..";
+        textField.value = textFieldText;
 
         textField.RegisterValueChangedCallback(evt =>
         {

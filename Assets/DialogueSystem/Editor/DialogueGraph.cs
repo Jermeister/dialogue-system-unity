@@ -48,9 +48,7 @@ public class DialogueGraph : EditorWindow
         blackboard.editTextRequested = (bb, element, newValue) =>
         {
             var oldPropertyName = ((BlackboardField) element).text;
-            
-            var tempCounter = 0;
-            
+
             if (newValue == null)
                 return;
 

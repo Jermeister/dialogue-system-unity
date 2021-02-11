@@ -91,6 +91,11 @@ public class DialogueGraphView : GraphView
         }
     }
 
+    private void CreateNodeFromData()
+    {
+        
+    }
+
     public void AddPropertyToBlackboard()
     {
         switch ((BlackboardType) typeEnum.value)
@@ -122,14 +127,19 @@ public class DialogueGraphView : GraphView
     {
         foreach (var property in propertiesData)
         {
-            exposedProperties.Add(new ExposedProperty()
+            switch (property.propertyType)
             {
-                PropertyName = property.propertyName,
-                PropertyValue = property.propertyValue,
-                propertyType = property.propertyType,
-            });
+                case BlackboardType.None:
+                    var noneProperty = new NoneProperty() {PropertyName = "None", propertyType = BlackboardType.None, PropertyValue = "None"};
+                    exposedProperties.Add(noneProperty);
+                    break;
+                case BlackboardType.Character:
+                    var characterProperty = new CharacterProperty(property.propertyName, property.propertyValue, this);
+                    exposedProperties.Add(characterProperty);
+                    break;
+            }
         }
-        
+
         RepaintBlackboardNoCheck();
     }
 
@@ -145,6 +155,8 @@ public class DialogueGraphView : GraphView
             if (property.propertyType != BlackboardType.None)
                 blackboard.Add(property.propertyElement);
         }
+        
+        blackboard.MarkDirtyRepaint();
     }
 
     public void CheckPropertyNameAvailability(ref string propertyName)
