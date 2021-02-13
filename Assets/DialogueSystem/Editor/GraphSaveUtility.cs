@@ -231,23 +231,7 @@ public class GraphSaveUtility
 
     private void ClearGraph()
     {
-        var baseNodes = nodes.Cast<BaseNode>().ToList();
-
-        if (!_containerCache || _containerCache.nodeLinks == null || baseNodes.Count == 0)
-            return;
-        
-        // Set entry points guid back from the save, discard existing guid.
-        //baseNodes.Find(x => x.inputPoint).guid = _containerCache.nodeLinks[0].thisNodeGuid;
-
-        foreach (var node in baseNodes)
-        {
-            if (node.inputPoint) continue;
-
-            // Remove connections associated with the node
-            edges.Where(x=>x.input.node == node).ToList().ForEach(edge=>_targetGraphView.RemoveElement(edge));
-            
-            // Remove the node
-            _targetGraphView.RemoveElement(node);
-        }
+        edges?.ToList().ForEach(edge=>_targetGraphView.RemoveElement(edge));
+        nodes?.ToList().ForEach(node=> _targetGraphView.RemoveElement(node));
     }
 }

@@ -36,7 +36,7 @@ public class DialogueGraphView : GraphView
         AddElement(GenerateEntryPoint());
         AddSearchWindow(editorWindow);
 
-        typeEnum = new EnumField(new BlackboardType());
+        typeEnum = new EnumField(BlackboardType.Character);
     }
 
     private void AddSearchWindow(EditorWindow editorWindow)
