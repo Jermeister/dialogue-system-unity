@@ -39,7 +39,7 @@ public class ChoiceNode : BaseNode
         
         // Generate dropdown for Character
         var propertyIndex = _graphView.exposedProperties.FindIndex(x => x.PropertyName == choiceNodeData.speaker);
-        SetupCharacterSelection(0);
+        SetupCharacterSelection(propertyIndex);
 
         RefreshExpandedState();
         RefreshPorts();

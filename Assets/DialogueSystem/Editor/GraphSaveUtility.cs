@@ -41,10 +41,17 @@ public class GraphSaveUtility
         if (!Directory.Exists("Assets/Resources/Dialogues"))
             Directory.CreateDirectory("Assets/Resources/Dialogues");
         
-        AssetDatabase.DeleteAsset($"Assets/Resources/Dialogues/{fileName}.asset");
-        AssetDatabase.CreateAsset(dialogueContainer, $"Assets/Resources/Dialogues/{fileName}.asset");
-        AssetDatabase.SaveAssets();
+        if (Directory.Exists($"Assets/Resources/Dialogues/{fileName}.asset"))
+        {
+            var outputContainer = AssetDatabase.LoadMainAssetAtPath ($"Assets/Resources/Dialogues/{fileName}.asset") as NodesContainer;
+            EditorUtility.CopySerialized(dialogueContainer, outputContainer);
+        }
+        else
+        {
+            AssetDatabase.CreateAsset(dialogueContainer, $"Assets/Resources/Dialogues/{fileName}.asset");
+        }
         
+        AssetDatabase.SaveAssets();
         Selection.activeObject=AssetDatabase.LoadMainAssetAtPath($"Assets/Resources/Dialogues/{fileName}.asset");
     }
 
@@ -133,8 +140,8 @@ public class GraphSaveUtility
                     nodesContainer.choiceNodesData.Add(new ChoiceNodeData()
                     {
                         guid = baseNode.guid,
-                        speaker = choiceNode.characterDropdown.value.PropertyName,
-                        dialogueText = choiceNode.dialogueTextField.text,
+                        speaker = choiceNode?.characterDropdown.value.PropertyName,
+                        dialogueText = choiceNode?.dialogueTextField.text,
                     });
                     break;
             }

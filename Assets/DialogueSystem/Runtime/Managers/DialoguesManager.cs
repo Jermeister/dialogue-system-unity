@@ -65,8 +65,8 @@ public class DialoguesManager : MonoBehaviour
         }
         else // If pressing Next on DialogueOptions (need to find a correspondent option)
         {
-            var allNextLinks = currentContainer.nodesContainer.nodeLinks.FindAll(x => x.thisNodeGuid == currentNodeLink.nextNodeGuid);
-            currentNodeLink = currentContainer.nodesContainer.nodeLinks.Find(x => x.thisNodeGuid == allNextLinks[selectedId].thisNodeGuid);
+            var allNextLinks = currentContainer.nodesContainer.nodeLinks.FindAll(x => x.thisNodeGuid == currentNodeLink.thisNodeGuid);
+            currentNodeLink = currentContainer.nodesContainer.nodeLinks.Find(x => x.thisNodeGuid == allNextLinks[selectedId].nextNodeGuid);
             currentNode = currentContainer.nodesContainer.baseNodesData.Find(x => x.guid == currentNodeLink.thisNodeGuid);
         }
         
@@ -76,7 +76,7 @@ public class DialoguesManager : MonoBehaviour
         {
             case NodeType.ChoiceNode:
                 var currentNodeDataChoice = currentContainer.nodesContainer.choiceNodesData.Find(x => x.guid == currentNode.guid);
-                var allNextLinks = currentContainer.nodesContainer.nodeLinks.FindAll(x => x.thisNodeGuid == currentNodeLink.nextNodeGuid);
+                var allNextLinks = currentContainer.nodesContainer.nodeLinks.FindAll(x => x.thisNodeGuid == currentNodeLink.thisNodeGuid);
                 dialogueOptions.SetupDialogue(currentNodeDataChoice.speaker, currentNodeDataChoice.dialogueText, allNextLinks);
                 break;
             case NodeType.DialogueNode:
