@@ -38,19 +38,19 @@ MonoBehaviour:
     nodeType: 0
   - guid: fd13dbf0-856f-49eb-aba5-ca3daa3094f6
     nodeName: Dialogue Node
-    position: {x: 443, y: 245.5}
+    position: {x: 443, y: 246}
     nodeType: 2
   - guid: 32425c4a-5af1-4232-aa71-9d883e41adb7
     nodeName: Choice Node
-    position: {x: 630, y: 245.5}
+    position: {x: 630, y: 246}
     nodeType: 3
   - guid: aba71ed6-6458-483a-8357-1b58cd00d933
     nodeName: Dialogue Node
-    position: {x: 966.5, y: 250}
+    position: {x: 967, y: 250}
     nodeType: 2
   - guid: 324b1677-6238-40c7-b7ce-6ad96dc3275f
     nodeName: 
-    position: {x: 1142.5, y: 250}
+    position: {x: 1143, y: 250}
     nodeType: 1
   dialogueNodesData:
   - guid: fd13dbf0-856f-49eb-aba5-ca3daa3094f6
@@ -65,7 +65,7 @@ MonoBehaviour:
   choiceNodesData:
   - guid: 32425c4a-5af1-4232-aa71-9d883e41adb7
     dialogueText: Yooo duuuude
-    speaker: Antanazz
+    speaker: None
   exposedProperties:
   - propertyName: None
     propertyValue: None
