@@ -13,6 +13,11 @@ public class DialogueOptions : MonoBehaviour
 
     public TMP_Text dialogueText;
     public TMP_Text speakerNameText;
+    
+    private float letterRevealTime = 0.05f;
+
+    private bool revealing = false;
+    private Coroutine revealCoroutine = null;
 
     public void SetupDialogue(string speakerName, string dialogue, List<NodeLinkData> options)
     {
@@ -22,6 +27,8 @@ public class DialogueOptions : MonoBehaviour
         SetupOptions(options);
 
         gameObject.SetActive(true);
+        
+        revealCoroutine = StartCoroutine(RevealText());
     }
 
     private void SetupOptions(List<NodeLinkData> options)
@@ -43,11 +50,35 @@ public class DialogueOptions : MonoBehaviour
             count--;
         }
     }
+
+    private void RevealAll()
+    {
+        if (revealing)
+        {
+            StopCoroutine(revealCoroutine);
+            dialogueText.maxVisibleCharacters = dialogueText.text.Length;
+            revealing = false;
+        }
+    }
     
     public void NextDialogue(int index)
     {
         gameObject.SetActive(false);
         Debug.Log($"Selected option: {index}");
         DialoguesManager.instance.Next(index);
+    }
+    
+    private IEnumerator RevealText()
+    {
+        int letterCount = dialogueText.text.Length;
+        revealing = true;
+
+        for (int i = 0; i <= letterCount; i++)
+        {
+            dialogueText.maxVisibleCharacters = i;
+            yield return new WaitForSeconds(letterRevealTime);
+        }
+
+        revealing = false;
     }
 }

@@ -11,6 +11,10 @@ public class DialogueSingle : MonoBehaviour
 
     private List<string> dialogueTexts;
     private int currentIndex = 0;
+    private float letterRevealTime = 0.05f;
+
+    private bool revealing = false;
+    private Coroutine revealCoroutine = null;
 
     public void SetupDialogue(string speakerName, List<string> dialogues)
     {
@@ -20,10 +24,20 @@ public class DialogueSingle : MonoBehaviour
         speakerNameText.text = speakerName;
 
         gameObject.SetActive(true);
+        
+        revealCoroutine = StartCoroutine(RevealText());
     }
 
     public void NextDialogue()
     {
+        if (revealing)
+        {
+            StopCoroutine(revealCoroutine);
+            dialogueText.maxVisibleCharacters = dialogueText.text.Length;
+            revealing = false;
+            return;
+        }
+
         currentIndex++;
 
         if (currentIndex >= dialogueTexts.Count)
@@ -34,6 +48,21 @@ public class DialogueSingle : MonoBehaviour
         else
         {
             dialogueText.text = dialogueTexts[currentIndex];
+            revealCoroutine = StartCoroutine(RevealText());
         }
+    }
+
+    private IEnumerator RevealText()
+    {
+        int letterCount = dialogueText.text.Length;
+        revealing = true;
+
+        for (int i = 0; i <= letterCount; i++)
+        {
+            dialogueText.maxVisibleCharacters = i;
+            yield return new WaitForSeconds(letterRevealTime);
+        }
+
+        revealing = false;
     }
 }
