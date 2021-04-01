@@ -13,6 +13,7 @@ using UnityEngine.UIElements;
 public class DialogueGraphView : GraphView
 {
     public readonly Vector2 defaultNodeSize = new Vector2(200,150);
+    public readonly Vector2 defaultCommentBlockSize = new Vector2(300, 200);
 
     public Blackboard blackboard;
     public List<ExposedProperty> exposedProperties = new List<ExposedProperty>();
@@ -70,6 +71,8 @@ public class DialogueGraphView : GraphView
     public void CreateNode(NodeType _nodeType, Vector2 _position = new Vector2())
     {
         var node = CreateNewNode(_nodeType, _position);
+        if (node == null)
+            return;
         AddElement(node);
     }
 
@@ -86,14 +89,26 @@ public class DialogueGraphView : GraphView
                 return new ChoiceNode(_position, this);
             case NodeType.EndNode:
                 return new BaseNode(_nodeType, this, _position);
+            case NodeType.GroupNode:
+                var group = CreateCommentBlock(new Rect(_position, defaultCommentBlockSize));
+                return null;
             default:
                 return null;
         }
     }
 
-    private void CreateNodeFromData()
+    public Group CreateCommentBlock(Rect rect, CommentBlockData commentBlockData = null)
     {
-        
+        if (commentBlockData == null)
+            commentBlockData = new CommentBlockData();
+        var group = new Group
+        {
+            autoUpdateGeometry = true,
+            title = commentBlockData.title
+        };
+        AddElement(group);
+        group.SetPosition(rect);
+        return group;
     }
 
     public void AddPropertyToBlackboard()

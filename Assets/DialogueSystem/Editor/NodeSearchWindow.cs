@@ -27,7 +27,6 @@ public class NodeSearchWindow : ScriptableObject, ISearchWindowProvider
         var tree = new List<SearchTreeEntry>
         {
             new SearchTreeGroupEntry(new GUIContent("Create Node"), 0),
-            //new SearchTreeGroupEntry(new GUIContent("Dialogue Node"), 1),
             new SearchTreeEntry(new GUIContent("Dialogue Node", _indentationIcon))
             {
                 userData = NodeType.DialogueNode,
@@ -41,6 +40,11 @@ public class NodeSearchWindow : ScriptableObject, ISearchWindowProvider
             new SearchTreeEntry(new GUIContent("End Node", _indentationIcon))
             {
                 userData = NodeType.EndNode,
+                level = 1,
+            },
+            new SearchTreeEntry(new GUIContent("Comment Block", _indentationIcon))
+            {
+                userData = NodeType.GroupNode,
                 level = 1,
             },
         };

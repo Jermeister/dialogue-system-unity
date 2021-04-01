@@ -19,6 +19,7 @@ public enum NodeType
     EndNode,
     DialogueNode,
     ChoiceNode,
+    GroupNode,
 }
 
 [System.Serializable]
