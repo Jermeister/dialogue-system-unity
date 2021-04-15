@@ -17,13 +17,13 @@ MonoBehaviour:
     portName: Output
     nextNodeGuid: 2b102eac-8622-48f8-bb29-91d5bf55b071
   - thisNodeGuid: 32425c4a-5af1-4232-aa71-9d883e41adb7
-    portName: It's Untaazz
+    portName: Don't upset your father, not now.
     nextNodeGuid: aba71ed6-6458-483a-8357-1b58cd00d933
   - thisNodeGuid: 32425c4a-5af1-4232-aa71-9d883e41adb7
-    portName: It's not your business
+    portName: It's not important, right now.
     nextNodeGuid: 1d2e750a-700a-4ead-92b5-d657211e01ac
   - thisNodeGuid: 32425c4a-5af1-4232-aa71-9d883e41adb7
-    portName: Ye Boiiiii
+    portName: You must be mad, coming here like this.
     nextNodeGuid: 33f83663-ac81-44e1-bdb1-5d2af3d8c94d
   - thisNodeGuid: 2b102eac-8622-48f8-bb29-91d5bf55b071
     portName: Output
@@ -41,77 +41,74 @@ MonoBehaviour:
     portName: Start
     nextNodeGuid: fd13dbf0-856f-49eb-aba5-ca3daa3094f6
   baseNodesData:
-  - guid: fd13dbf0-856f-49eb-aba5-ca3daa3094f6
+  - guid: 324b1677-6238-40c7-b7ce-6ad96dc3275f
+    nodeName: 
+    position: {x: 1751, y: 115}
+    nodeType: 1
+  - guid: 2b102eac-8622-48f8-bb29-91d5bf55b071
     nodeName: Dialogue Node
-    position: {x: 443, y: 246}
+    position: {x: 730, y: 247}
     nodeType: 2
   - guid: 32425c4a-5af1-4232-aa71-9d883e41adb7
     nodeName: Choice Node
-    position: {x: 815, y: 246}
+    position: {x: 953, y: 101}
     nodeType: 3
+  - guid: aba71ed6-6458-483a-8357-1b58cd00d933
+    nodeName: Dialogue Node
+    position: {x: 1406, y: -68}
+    nodeType: 2
+  - guid: 1d2e750a-700a-4ead-92b5-d657211e01ac
+    nodeName: Dialogue Node
+    position: {x: 1463, y: 127}
+    nodeType: 2
+  - guid: 33f83663-ac81-44e1-bdb1-5d2af3d8c94d
+    nodeName: Dialogue Node
+    position: {x: 1406, y: 341}
+    nodeType: 2
   - guid: f7cae8d6-8a98-4ea9-ac93-50fef6e6a206
     nodeName: 
-    position: {x: 325, y: 87}
+    position: {x: 301, y: 87}
     nodeType: 0
-  - guid: 2b102eac-8622-48f8-bb29-91d5bf55b071
+  - guid: fd13dbf0-856f-49eb-aba5-ca3daa3094f6
     nodeName: Dialogue Node
-    position: {x: 607, y: -17}
+    position: {x: 408, y: 105}
     nodeType: 2
-  - guid: aba71ed6-6458-483a-8357-1b58cd00d933
-    nodeName: Dialogue Node
-    position: {x: 1148, y: 75}
-    nodeType: 2
-  - guid: 1d2e750a-700a-4ead-92b5-d657211e01ac
-    nodeName: Dialogue Node
-    position: {x: 1160, y: 270}
-    nodeType: 2
-  - guid: 33f83663-ac81-44e1-bdb1-5d2af3d8c94d
-    nodeName: Dialogue Node
-    position: {x: 1160, y: 461}
-    nodeType: 2
-  - guid: 324b1677-6238-40c7-b7ce-6ad96dc3275f
-    nodeName: 
-    position: {x: 1380, y: 270}
-    nodeType: 1
   dialogueNodesData:
+  - guid: 2b102eac-8622-48f8-bb29-91d5bf55b071
+    dialogueTexts:
+    - 'This isn''t just about you. '
+    - It's about what's best for all of us.
+    speaker: Docker
+  - guid: aba71ed6-6458-483a-8357-1b58cd00d933
+    dialogueTexts:
+    - I dread the sound of his key in the lock.
+    speaker: Derick
+  - guid: 1d2e750a-700a-4ead-92b5-d657211e01ac
+    dialogueTexts:
+    - I want all the details!
+    speaker: Derick
+  - guid: 33f83663-ac81-44e1-bdb1-5d2af3d8c94d
+    dialogueTexts:
+    - Is there something you want to tell me, son?
+    speaker: Derick
   - guid: fd13dbf0-856f-49eb-aba5-ca3daa3094f6
     dialogueTexts:
-    - What's up
-    - What's your name?
-    speaker: Jonizz
-  - guid: 2b102eac-8622-48f8-bb29-91d5bf55b071
-    dialogueTexts:
-    - My name is...
-    - Antanazz
-    - What is your name?
-    speaker: Aloyz
-  - guid: aba71ed6-6458-483a-8357-1b58cd00d933
-    dialogueTexts:
-    - Nice to meet you Untazz!
-    speaker: Aloyz
-  - guid: 1d2e750a-700a-4ead-92b5-d657211e01ac
-    dialogueTexts:
-    - Why so serious..
-    speaker: Aloyz
-  - guid: 33f83663-ac81-44e1-bdb1-5d2af3d8c94d
-    dialogueTexts:
-    - I asked for your name..
-    - Bitch
-    speaker: Aloyz
+    - Why didn't he come and talk to me himself?
+    speaker: Derick
   choiceNodesData:
   - guid: 32425c4a-5af1-4232-aa71-9d883e41adb7
-    dialogueText: Idk..
-    speaker: Jonizz
+    dialogueText: '"I don''t often get the chance to talk to someone like you."'
+    speaker: Kelvin
   exposedProperties:
   - propertyName: None
     propertyValue: None
     propertyType: 0
-  - propertyName: Jonizz
+  - propertyName: Derick
     propertyValue: New Value
     propertyType: 1
-  - propertyName: Antanazz
+  - propertyName: Kelvin
     propertyValue: New Value
     propertyType: 1
-  - propertyName: Aloyz
+  - propertyName: Docker
     propertyValue: New Value
     propertyType: 1
