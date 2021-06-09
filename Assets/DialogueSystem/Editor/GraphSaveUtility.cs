@@ -9,17 +9,17 @@ using UnityEngine.UIElements;
 
 public class GraphSaveUtility
 {
-    private DialogueGraphView _targetGraphView;
-    private NodesContainer _containerCache;
+    private DialogueGraphView targetGraphView;
+    private NodesContainer containerCache;
 
-    private List<Edge> edges => _targetGraphView.edges.ToList();
-    private List<Node> nodes => _targetGraphView.nodes.ToList();
+    private List<Edge> edges => targetGraphView.edges.ToList();
+    private List<Node> nodes => targetGraphView.nodes.ToList();
     
-    public static GraphSaveUtility GetInstance(DialogueGraphView targetGraphView)
+    public static GraphSaveUtility GetInstance(DialogueGraphView graphView)
     {
         return new GraphSaveUtility
         {
-            _targetGraphView = targetGraphView
+            targetGraphView = graphView
         };
     }
 
@@ -27,7 +27,22 @@ public class GraphSaveUtility
     {
         var dialogueContainer = ScriptableObject.CreateInstance<NodesContainer>();
 
-        if (!SaveNodes(dialogueContainer))
+        // No connections, don't save anything
+        if (!edges.Any())
+        {
+            EditorUtility.DisplayDialog("Error", "No connections. Please connect some nodes to save.", "OK");
+            return;
+        }
+        
+        // No connections from Start Node
+        var entryPoint = edges.Find(x => x.output.node.title == "Start");        
+        if(entryPoint == null)
+        {
+            EditorUtility.DisplayDialog("Error", "Start Node must be connected before saving.", "OK");
+            return;
+        }
+        
+        if (!BuildNodesContainer(dialogueContainer))
         {
             return;
         }
@@ -59,7 +74,7 @@ public class GraphSaveUtility
     {
         var exposedPropertiesData = new List<ExposedPropertyData>();
 
-        foreach (var property in _targetGraphView.exposedProperties)
+        foreach (var property in targetGraphView.exposedProperties)
         {
             exposedPropertiesData.Add(new ExposedPropertyData()
             {
@@ -72,24 +87,20 @@ public class GraphSaveUtility
         nodesContainer.exposedProperties = exposedPropertiesData;
     }
 
-
-    public bool SaveNodes(NodesContainer nodesContainer)
+    public NodesContainer GetNodesContainer()
     {
-        // No connections, don't save anything
-        if (!edges.Any())
+        var dialogueContainer = ScriptableObject.CreateInstance<NodesContainer>();
+        
+        if (!BuildNodesContainer(dialogueContainer))
         {
-            EditorUtility.DisplayDialog("Error", "No connections. Please connect some nodes to save.", "OK");
-            return false;
+            return null;
         }
         
-        // No connections from Start Node
-        var entryPoint = edges.Find(x => x.output.node.title == "Start");        
-        if(entryPoint == null)
-        {
-            EditorUtility.DisplayDialog("Error", "Start Node must be connected before saving.", "OK");
-            return false;
-        }
+        return dialogueContainer;
+    }
 
+    public bool BuildNodesContainer(NodesContainer nodesContainer)
+    {
         var connectedPorts = edges.Where(x => x.input.node != null).OrderByDescending(x => ((BaseNode)(x.output.node)).inputPoint).ToArray();
 
         for (int i = 0; i < connectedPorts.Length; i++)
@@ -108,41 +119,17 @@ public class GraphSaveUtility
         foreach (var node in nodes)
         {
             var baseNode = node as BaseNode;
-            nodesContainer.baseNodesData.Add(new BaseNodeData()
-            {
-                guid = baseNode.guid,
-                nodeName = baseNode.nodeName,
-                position = baseNode.GetPosition().position,
-                nodeType = baseNode.nodeType,
-            });
+            nodesContainer.baseNodesData.Add(baseNode.CopyData(true));
 
             switch (baseNode.nodeType)
             {
                 case NodeType.DialogueNode:
                     var dialogueNode = node as DialogueNode;
-                    var textsList = new List<string>();
-                    
-                    foreach (var textField in dialogueNode.dialogueTexts)
-                    {
-                        textsList.Add(textField.text);
-                    }
-
-                    nodesContainer.dialogueNodesData.Add(new DialogueNodeData()
-                    {
-                        guid = baseNode.guid,
-                        speaker = dialogueNode?.characterDropdown.value.PropertyName,
-                        dialogueTexts = textsList,
-                    });
+                    nodesContainer.dialogueNodesData.Add(dialogueNode.CopyData(true));
                     break;
                 case NodeType.ChoiceNode:
                     var choiceNode = node as ChoiceNode;
-
-                    nodesContainer.choiceNodesData.Add(new ChoiceNodeData()
-                    {
-                        guid = baseNode.guid,
-                        speaker = choiceNode?.characterDropdown.value.PropertyName,
-                        dialogueText = choiceNode?.dialogueTextField.text,
-                    });
+                    nodesContainer.choiceNodesData.Add(choiceNode.CopyData(true));
                     break;
             }
         }
@@ -152,9 +139,9 @@ public class GraphSaveUtility
 
     public void LoadGraph(string fileName)
     {
-        _containerCache = Resources.Load<NodesContainer>($"Dialogues/{fileName}");
+        containerCache = Resources.Load<NodesContainer>($"Dialogues/{fileName}");
 
-        if (_containerCache == null)
+        if (containerCache == null)
         {
             EditorUtility.DisplayDialog("File not found!", "Target dialogue graph file does not exist.", "OK");
             return;
@@ -169,8 +156,8 @@ public class GraphSaveUtility
     private void CreateExposedProperties()
     {
         // Clear existing properties and create new ones from data
-        _targetGraphView.ClearExposedProperties();
-        _targetGraphView.AddExposedPropertiesFromData(_containerCache.exposedProperties);
+        targetGraphView.ClearExposedProperties();
+        targetGraphView.AddExposedPropertiesFromData(containerCache.exposedProperties);
     }
 
     private void ConnectNodes()
@@ -178,7 +165,7 @@ public class GraphSaveUtility
         var baseNodes = nodes.Cast<BaseNode>().ToList();
         for (int i = 0; i < baseNodes.Count; i++)
         {
-            var connections = _containerCache.nodeLinks.Where(x => x.thisNodeGuid == baseNodes[i].guid).ToList();
+            var connections = containerCache.nodeLinks.Where(x => x.thisNodeGuid == baseNodes[i].guid).ToList();
 
             for (int j = 0; j < connections.Count; j++)
             {
@@ -204,33 +191,33 @@ public class GraphSaveUtility
         tempEdge?.input.Connect(tempEdge);
         tempEdge?.output.Connect(tempEdge);
         
-        _targetGraphView.Add(tempEdge);
+        targetGraphView.Add(tempEdge);
     }
 
     private void CreateNodes()
     {
-        foreach (var nodeData in _containerCache.baseNodesData)
+        foreach (var nodeData in containerCache.baseNodesData)
         {
             switch (nodeData.nodeType)
             {
                 case NodeType.StartNode:
-                    var startNode = new BaseNode(nodeData.nodeType, _targetGraphView, nodeData.position, nodeData.guid);
-                    _targetGraphView.AddElement(startNode);
+                    var startNode = new BaseNode(nodeData.nodeType, targetGraphView, nodeData.position, nodeData.guid);
+                    targetGraphView.AddElement(startNode);
                     break;
                 case NodeType.DialogueNode:
-                    DialogueNodeData dialogueData = _containerCache.dialogueNodesData.Find(x => x.guid == nodeData.guid);
-                    var dialogueNode = new DialogueNode(_targetGraphView, nodeData, dialogueData);
-                    _targetGraphView.AddElement(dialogueNode);
+                    DialogueNodeData dialogueData = containerCache.dialogueNodesData.Find(x => x.guid == nodeData.guid);
+                    var dialogueNode = new DialogueNode(targetGraphView, nodeData, dialogueData);
+                    targetGraphView.AddElement(dialogueNode);
                     break;
                 case NodeType.ChoiceNode:
-                    ChoiceNodeData choiceData = _containerCache.choiceNodesData.Find(x => x.guid == nodeData.guid);
-                    var nodePorts = _containerCache.nodeLinks.Where(x => x.thisNodeGuid == nodeData.guid).ToList();
-                    var choiceNode = new ChoiceNode(_targetGraphView, nodeData, choiceData, nodePorts);
-                    _targetGraphView.AddElement(choiceNode);
+                    ChoiceNodeData choiceData = containerCache.choiceNodesData.Find(x => x.guid == nodeData.guid);
+                    var nodePorts = containerCache.nodeLinks.Where(x => x.thisNodeGuid == nodeData.guid).ToList();
+                    var choiceNode = new ChoiceNode(targetGraphView, nodeData, choiceData, nodePorts);
+                    targetGraphView.AddElement(choiceNode);
                     break;
                 case NodeType.EndNode:
-                    var endNode = new BaseNode(nodeData.nodeType, _targetGraphView, nodeData.position, nodeData.guid);
-                    _targetGraphView.AddElement(endNode);
+                    var endNode = new BaseNode(nodeData.nodeType, targetGraphView, nodeData.position, nodeData.guid);
+                    targetGraphView.AddElement(endNode);
                     break;
             }
         }
@@ -238,7 +225,7 @@ public class GraphSaveUtility
 
     private void ClearGraph()
     {
-        edges?.ToList().ForEach(edge=>_targetGraphView.RemoveElement(edge));
-        nodes?.ToList().ForEach(node=> _targetGraphView.RemoveElement(node));
+        edges?.ToList().ForEach(edge=>targetGraphView.RemoveElement(edge));
+        nodes?.ToList().ForEach(node=> targetGraphView.RemoveElement(node));
     }
 }

@@ -51,6 +51,18 @@ public class ChoiceNode : BaseNode
         }
     }
 
+    public new ChoiceNodeData CopyData(bool keepGuid = true)
+    {
+        var data = new ChoiceNodeData
+        {
+            guid = keepGuid ? guid : Guid.NewGuid().ToString(),
+            speaker = characterDropdown.value.PropertyName,
+            dialogueText = dialogueTextField.text,
+        };
+        
+        return data;
+    }
+
     private void Initialize(string nName = "Choice Node", string nodeGuid = null, string dialogueText = "Insert text..")
     {
         choiceTexts = new List<TextField>();

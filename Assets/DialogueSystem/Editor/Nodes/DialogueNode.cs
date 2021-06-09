@@ -50,6 +50,20 @@ public class DialogueNode : BaseNode
         }
     }
 
+    public new DialogueNodeData CopyData(bool keepGuid = true)
+    {
+        var textList = dialogueTexts.Select(textObject => textObject.text).ToList();
+        
+        var data = new DialogueNodeData
+        {
+            guid = keepGuid ? guid : Guid.NewGuid().ToString(),
+            speaker = characterDropdown.value.PropertyName,
+            dialogueTexts = textList,
+        };
+        
+        return data;
+    }
+
     private void Initialize(string nName = "Dialogue Node", string nodeGuid = null)
     {
         nodeName = nName;

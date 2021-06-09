@@ -37,6 +37,19 @@ public class BaseNode : Node
 
     public BaseNode() { }
 
+    public BaseNodeData CopyData(bool keepGuid = true)
+    {
+        var data = new BaseNodeData
+        {
+            guid = keepGuid ? guid : Guid.NewGuid().ToString(),
+            nodeName = nodeName,
+            position = GetPosition().position,
+            nodeType = nodeType,
+        };
+
+        return data;
+    }
+
     protected void SetupStartNode(Vector2 position, string nodeGuid = null)
     {
         title = "Start";

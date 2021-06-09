@@ -16,8 +16,8 @@ public class DialogueGraphView : GraphView
     public readonly Vector2 defaultCommentBlockSize = new Vector2(300, 200);
 
     public Blackboard blackboard;
-    public List<ExposedProperty> exposedProperties = new List<ExposedProperty>();
     public EnumField typeEnum;
+    public List<ExposedProperty> exposedProperties = new List<ExposedProperty>();
     
     private NodeSearchWindow _searchWindow;
 
@@ -90,25 +90,24 @@ public class DialogueGraphView : GraphView
             case NodeType.EndNode:
                 return new BaseNode(_nodeType, this, _position);
             case NodeType.GroupNode:
-                var group = CreateCommentBlock(new Rect(_position, defaultCommentBlockSize));
+                CreateGroupBlock(new Rect(_position, defaultCommentBlockSize));
                 return null;
             default:
                 return null;
         }
     }
 
-    public Group CreateCommentBlock(Rect rect, CommentBlockData commentBlockData = null)
+    public void CreateGroupBlock(Rect rect, GroupNodeData groupNodeData = null)
     {
-        if (commentBlockData == null)
-            commentBlockData = new CommentBlockData();
+        if (groupNodeData == null)
+            groupNodeData = new GroupNodeData();
         var group = new Group
         {
             autoUpdateGeometry = true,
-            title = commentBlockData.title
+            title = groupNodeData.title
         };
         AddElement(group);
         group.SetPosition(rect);
-        return group;
     }
 
     public void AddPropertyToBlackboard()
@@ -193,7 +192,7 @@ public class DialogueGraphView : GraphView
     {
         evt.menu.AppendAction("Delete", DeletePropertyFromBlackboard, DropdownMenuAction.AlwaysEnabled, ((BlackboardField)evt.target).text);
     }
-    
+
     public void RemovePropertyFromBlackboard(string propertyName)
     {
         var propertyToRemoveId = exposedProperties.FindIndex(prop => prop.PropertyName == propertyName);

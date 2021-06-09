@@ -42,7 +42,7 @@ public class NodeSearchWindow : ScriptableObject, ISearchWindowProvider
                 userData = NodeType.EndNode,
                 level = 1,
             },
-            new SearchTreeEntry(new GUIContent("Comment Block", _indentationIcon))
+            new SearchTreeEntry(new GUIContent("Group Node", _indentationIcon))
             {
                 userData = NodeType.GroupNode,
                 level = 1,

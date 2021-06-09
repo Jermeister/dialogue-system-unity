@@ -11,8 +11,8 @@ using UnityEngine.UIElements;
 
 public class DialogueGraph : EditorWindow
 {
-    private DialogueGraphView _graphView;
-    private string _fileName;
+    private DialogueGraphView graphView;
+    private string fileName;
 
 
     [MenuItem("Graph/Dialogue Graph")]
@@ -29,20 +29,21 @@ public class DialogueGraph : EditorWindow
         GenerateBlackBoard();
         GenerateMinimap();
 
+        EnableCopyAndPasteOperation();
         DisableDifferentPortConnections();
     }
     
 
     private void GenerateBlackBoard()
     {
-        var blackboard = new Blackboard(_graphView);
+        var blackboard = new Blackboard(graphView);
         blackboard.scrollable = true;
    
-        blackboard.Add(_graphView.typeEnum);
+        blackboard.Add(graphView.typeEnum);
         blackboard.Add(new BlackboardSection{title="Exposed properties"});
         blackboard.addItemRequested = _blackboard =>
         {
-            _graphView.AddPropertyToBlackboard();
+            graphView.AddPropertyToBlackboard();
         };
 
         blackboard.editTextRequested = (bb, element, newValue) =>
@@ -52,19 +53,19 @@ public class DialogueGraph : EditorWindow
             if (newValue == null)
                 return;
 
-            _graphView.CheckPropertyNameAvailability(ref newValue);
+            graphView.CheckPropertyNameAvailability(ref newValue);
 
-            var propertyIndex = _graphView.exposedProperties.FindIndex(x => x.PropertyName == oldPropertyName);
-            _graphView.exposedProperties[propertyIndex].PropertyName = newValue;
+            var propertyIndex = graphView.exposedProperties.FindIndex(x => x.PropertyName == oldPropertyName);
+            graphView.exposedProperties[propertyIndex].PropertyName = newValue;
             ((BlackboardField) element).text = newValue;
         };
         
         blackboard.SetPosition(new Rect(10, 180, 240, 300));
         
-        _graphView.Add(blackboard);
-        _graphView.blackboard = blackboard;
+        graphView.Add(blackboard);
+        graphView.blackboard = blackboard;
         
-        _graphView.AddPropertyToBlackboard();
+        graphView.AddPropertyToBlackboard();
     }
 
     private void GenerateMinimap()
@@ -74,33 +75,33 @@ public class DialogueGraph : EditorWindow
         var coords = new Rect(10, 30, 200, 140);
 
         minimap.SetPosition(coords);
-        _graphView.Add(minimap);
+        graphView.Add(minimap);
 
-        _graphView.Q<MiniMap>().zoomFactorTextChanged = delegate(string s) { 
+        graphView.Q<MiniMap>().zoomFactorTextChanged = delegate(string s) { 
             TestingRandomStuff();
          };
     }
 
     private void TestingRandomStuff()
     {
-        _graphView.Q<MiniMap>().Q<Label>().text = "";
+        graphView.Q<MiniMap>().Q<Label>().text = "";
     }
 
 
     private void ConstructGraphView()
     {
-        _graphView = new DialogueGraphView(this)
+        graphView = new DialogueGraphView(this)
         {
             name = "Dialogue Graph Editor"
         };
 
-        _graphView.StretchToParentSize();
-        rootVisualElement.Add(_graphView);
+        graphView.StretchToParentSize();
+        rootVisualElement.Add(graphView);
     }
 
     private void DisableDifferentPortConnections()
     {
-        _graphView.graphViewChanged += x =>
+        graphView.graphViewChanged += x =>
         {
             if (x.edgesToCreate != null)
             {
@@ -124,7 +125,7 @@ public class DialogueGraph : EditorWindow
         var fileNameTextField = new TextField("File Name:");
         fileNameTextField.SetValueWithoutNotify("New_Dialogue");
         fileNameTextField.MarkDirtyRepaint();
-        fileNameTextField.RegisterCallback((EventCallback<ChangeEvent<string>>)(evt => _fileName = evt.newValue));
+        fileNameTextField.RegisterCallback((EventCallback<ChangeEvent<string>>)(evt => fileName = evt.newValue));
         
         toolbar.Add(fileNameTextField);
         
@@ -138,7 +139,7 @@ public class DialogueGraph : EditorWindow
     {
         try
         {
-            rootVisualElement.Q<Toolbar>().Q<TextField>().value = _fileName;
+            rootVisualElement.Q<Toolbar>().Q<TextField>().value = fileName;
         }
         catch
         {
@@ -146,23 +147,31 @@ public class DialogueGraph : EditorWindow
         }
     }
 
+    private void EnableCopyAndPasteOperation()
+    {
+        var graphCxtMenuUtil = GraphContextMenuUtility.GetInstance(graphView);
+        graphView.serializeGraphElements += graphCxtMenuUtil.OnCopyElementsOption;
+        graphView.canPasteSerializedData += graphCxtMenuUtil.OnPasteValidation;
+        graphView.unserializeAndPaste += graphCxtMenuUtil.OnPasteElementsOption;
+    }
+
     private void RequestDataOperation(bool save)
     {
-        if (string.IsNullOrEmpty(_fileName))
+        if (string.IsNullOrEmpty(fileName))
         {
             EditorUtility.DisplayDialog("Invalid file name!", "Please enter a valid file name.", "OK");
             return;
         }
 
-        var saveUtility = GraphSaveUtility.GetInstance(_graphView);
+        var saveUtility = GraphSaveUtility.GetInstance(graphView);
 
         if (save)
         {
-            saveUtility.SaveGraph(_fileName);
+            saveUtility.SaveGraph(fileName);
         }
         else
         {
-            saveUtility.LoadGraph(_fileName);
+            saveUtility.LoadGraph(fileName);
             UpdateFileNameTextField();
         }
     }
@@ -170,16 +179,10 @@ public class DialogueGraph : EditorWindow
 
     public void OnDisable()
     {
-        rootVisualElement.Remove(_graphView);
+        rootVisualElement.Remove(graphView);
     }
     
-    /* OnOpenAssetAttribute has an option to provide an order index in the callback, starting at 0. 
-    * This is useful if you have more than one OnOpenAssetAttribute callback, 
-    * and you would like them to be called in a certain order. Callbacks are called in order, starting at zero.
-    *
-    * Must return true if you handled the opening of the asset or false if an external tool should open it.
-    * The method with this attribute must use at least these two parameters!
-    */
+
     [OnOpenAsset]
     public static bool OnOpenAsset(int instanceID, int line)
     {
@@ -192,17 +195,11 @@ public class DialogueGraph : EditorWindow
             DialogueGraph window = GetWindow<DialogueGraph>();
             window.titleContent = new GUIContent($"{nodesContainer.name} (Dialogue Graph)");
             
-            //Debug.Log($"Dialogue Container name: {dialogueContainer.name}");
-
-            //Once the window is opened, we load the content of the scriptable object.
-            //Even if the new name doesn't show up in the TextField, we need to assign the _fileName
-            //to load the appropriate file.
-            window._fileName = nodesContainer.name;
+            window.fileName = nodesContainer.name;
             window.RequestDataOperation(false);
             return true;
         }
-
-        //If object not found, won't open anything since we need the object to draw the window.
+        
         return false; 
     }
 }
