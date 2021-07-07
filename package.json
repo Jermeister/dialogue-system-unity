@@ -1,0 +1,26 @@
+{
+  "name": "com.tacare.dialoguesystem",
+  "version": "0.0.1",
+  "displayName": "Story Craft",
+  "description": "This is a tool for dialog authoring and execution.",
+  "unity": "2019.4",
+  "unityRelease": "0b5",
+  "documentationUrl": "https://github.com/Jermeister/dialogue-system-unity#readme",
+  "changelogUrl": "",
+  "licensesUrl": "",
+  "dependencies": {
+    "com.unity.textmeshpro": "3.0.3",
+	"com.unity.modules.ui": "1.0.0",
+    "com.unity.modules.uielements": "1.0.0"
+ },
+ "keywords": [
+    "Dialogue",
+    "Conversation",
+    "Graph"
+  ],
+  "author": {
+    "name": "Tacare",
+    "email": "",
+    "url": ""
+  }
+}
